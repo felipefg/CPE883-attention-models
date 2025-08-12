@@ -1,40 +1,37 @@
 \documentclass{beamer}
-\usepackage{amsfonts,amsmath,oldgerm}
+
+% --- Pacotes essenciais (seguros com o tema SINTEF) ---
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % remova se compilar com XeLaTeX/LuaLaTeX
+\usepackage{lmodern}
+\usepackage{amsmath,amsfonts}
+\usepackage{oldgerm} % você já usava; pode remover se não precisar
+
+% --- Tema e fontes ---
 \usetheme{sintef}
-
-\newcommand{\testcolor}[1]{\colorbox{#1}{\textcolor{#1}{test}}~\texttt{#1}}
-
 \usefonttheme[onlymath]{serif}
 
-\titlebackground*{assets/background}
-
-% adicionar o numero na lista final da apresentação
-\setbeamertemplate{bibliography item}{\insertbiblabel}
-
+% --- Macros do seu template/exemplos ---
+\newcommand{\testcolor}[1]{\colorbox{#1}{\textcolor{#1}{test}}~\texttt{#1}}
 \newcommand{\hrefcol}[2]{\textcolor{cyan}{\href{#1}{#2}}}
 
-%------------------------------------------------
-% Atenção: pressuponho que seu preâmbulo já tenha:
-% \documentclass{beamer}
-% \usetheme{sintef}
-% (e pacotes padrão do template)
-%------------------------------------------------
+% --- Title background (versão estrelada, antes do \maketitle) ---
+\titlebackground*{assets/background}
 
-% Metadados (ajuste no preâmbulo do seu .tex)
+% --- Bibliografia: mostrar número do item ---
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+
+% --- Metadados ---
 \title{Attention Models: da motivação às variantes modernas}
 \subtitle{Intuição geométrica, formulação matemática e aplicações}
 \author{Seu Nome}
 \date{\today}
 
-% Opcional: imagem de fundo do título
-% \titlebackground{assets/background_negative}
-
 \begin{document}
 
 \maketitle
 
-
-/% ============================
+% ============================
 % Evolução: LSTM → Atenção → Transformer (apenas frames)
 % ============================
 
@@ -179,7 +176,6 @@ M_{ij}=\begin{cases}
   \item Pesos de atenção ajudam na interpretabilidade
   \item Melhor relação capacidade/compute em diversas tarefas
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Histórico em 3 passos}
@@ -188,7 +184,6 @@ M_{ij}=\begin{cases}
   \item \textbf{Dot-Product Attention} (Luong) — caminho para escalabilidade
   \item \textbf{Transformers} (Vaswani et al., 2017): “Attention is All You Need”
 \end{itemize}
-% Tempo ~1 min
 \end{frame}
 
 %===========================
@@ -203,7 +198,6 @@ M_{ij}=\begin{cases}
   \item Dependências longas: vanish/explode (mitigado, não resolvido)
   \item Memória finita e custo de treino elevado para contextos longos
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{LSTM + Attention (Encoder--Decoder)}
@@ -220,7 +214,6 @@ c_j = \sum_i \alpha_{ij} h_i
   \item \textbf{Alinhamento} dinâmico entre estados do encoder e passos do decoder
   \item Reduz gargalos de um único vetor de contexto
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \section{Embeddings \& Interpretações}
@@ -230,7 +223,6 @@ c_j = \sum_i \alpha_{ij} h_i
   \item Subword (BPE/Unigram) para robustez morfológica
   \item Análogos em outras modalidades: patches (ViT), time2vec (TS), node2vec (grafos)
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Interpretação Geométrica da Atenção}
@@ -239,7 +231,6 @@ c_j = \sum_i \alpha_{ij} h_i
   \item Similaridade (coseno/dot) guia uma \emph{combinação convexa} de $V$
   \item Multi-head $\Rightarrow$ múltiplas métricas/projeções simultâneas
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Interpretação Matemática: Self-Attention}
@@ -253,7 +244,6 @@ c_j = \sum_i \alpha_{ij} h_i
   \item Complexidade $\mathcal{O}(n^2)$ em tempo/memória
   \item Gradientes e saturação da softmax
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Positional Encodings}
@@ -262,7 +252,6 @@ c_j = \sum_i \alpha_{ij} h_i
   \item Relativos e RoPE (rotary): melhor generalização/composição
   \item Impacto em extrapolação e contextos longos
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 %===========================
@@ -277,7 +266,6 @@ c_j = \sum_i \alpha_{ij} h_i
   \item Bloco: MHSA + FFN, \textit{residual} + \textit{layer norm}
   \item Pré-norm vs. pós-norm (estabilidade de treino)
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Atenções Eficientes}
@@ -290,7 +278,6 @@ c_j = \sum_i \alpha_{ij} h_i
 \begin{block}{Trade-off}
 Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda controlada de exatidão e/ou restrições de padrão.
 \end{block}
-% Tempo ~3 min
 \end{frame}
 
 \section{Treino \& Hiperparâmetros}
@@ -301,7 +288,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item AMP/mixed precision, grad clipping, checkpointing
   \item Dados: curriculum, masking, augmentation (TS/ViT/GAT)
 \end{itemize}
-% Tempo ~3 min
 \end{frame}
 
 \begin{frame}{Hiperparâmetros Essenciais}
@@ -310,7 +296,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Comprimento de contexto, batch size, \textit{LR schedule}
   \item Específicos: tokenização (LM), \textit{patch size} (ViT), janela/patch (TS)
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Qual tamanho ideal? (Scaling)}
@@ -319,7 +304,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Tokens vs. parâmetros; saturação com contexto
   \item Regra prática: dimensione para o dataset e o \textit{budget} de inferência
 \end{itemize}
-% Tempo ~3 min
 \end{frame}
 
 %===========================
@@ -334,7 +318,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Exógenas e \textit{cross-attention}; \textit{patching} para contextos longos
   \item Tarefas: previsão, imputação, detecção de anomalias
 \end{itemize}
-% Tempo ~3 min
 \end{frame}
 
 \section{Language Models}
@@ -344,7 +327,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Pré-treino vs. \textit{fine-tuning}; Instrução/LoRA/Adapters
   \item Métricas: perplexidade e tarefas \textit{downstream}
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \section{Vision Transformer}
@@ -354,7 +336,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Posicionais 2D; augmentations (RandAug, Mixup/CutMix)
   \item Transfer: \textit{linear probe} vs. \textit{fine-tune}
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \section{Graph Attention}
@@ -369,7 +350,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Multi-head; sobre-\textit{smoothing} e escalabilidade
   \item Heterógrafos e atenção relacional
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 %===========================
@@ -384,7 +364,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Roteamento esparso: capacidade vs. ociosidade
   \item Custos de comunicação e estabilidade no treino
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Pruning}
@@ -393,7 +372,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Iterativo vs. \textit{one-shot}; impacto em latência real
   \item Interação com quantização e \textit{sparsity-aware kernels}
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Distillation}
@@ -408,7 +386,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item \textit{Intermediate layer hints}; \textit{task-specific} vs. generalista
   \item Benefícios: latência/energia e \textit{edge deployment}
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 %===========================
@@ -423,7 +400,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item \textit{Probing} de camadas; ablação de cabeças
   \item Ferramentas de \textit{explainability} por domínio
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 \begin{frame}{Limitações \& Trade-offs}
@@ -432,7 +408,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Contaminação de treino e privacidade
   \item Energia/carbono e restrições de hardware
 \end{itemize}
-% Tempo ~2 min
 \end{frame}
 
 %===========================
@@ -445,7 +420,6 @@ Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda
   \item Escolha guiada por dados, métricas e orçamento (treino/inferência)
   \item Escala e compressão (MoE/pruning/distillation) para produção
 \end{itemize}
-% Tempo ~1 min
 \end{frame}
 
 %===========================
@@ -491,4 +465,3 @@ Obrigado!
 \end{frame}
 
 \end{document}
-
