@@ -162,22 +162,26 @@ Resolve o gargalo do vetor fixo único ($h_n$) e permite traduções mais fiéis
 
 
 \begin{frame}{Atenção multiplicativa (Luong, 2015)}
+\textbf{Três variantes de scoring:}
 \[
-e_{ij} = s_j^\top W h_i \quad \text{(general)}, \qquad
-e_{ij} = s_j^\top h_i \quad \text{(dot)}
+\begin{aligned}
+e_{ij} &= s_j^\top h_i && \text{(dot)} \\
+e_{ij} &= s_j^\top W h_i && \text{(general)} \\
+e_{ij} &= v^\top \tanh(W [s_j; h_i]) && \text{(concat, similar ao Bahdanau)}
+\end{aligned}
 \]
 
 \begin{itemize}
   \item $s_j$: query → estado oculto do decoder.
   \item $h_i$: key/value → estado do encoder.
-  \item Produto escalar ou bilinear calcula a similaridade (mais eficiente que Bahdanau).
-  \item O resto do processo é igual: normalização com softmax e contexto $c_j$.
-  \item \textbf{Vantagem:} cálculo mais simples, menos parâmetros, mais rápido.
+  \item \textbf{Dot:} mais simples e rápido (nenhum parâmetro extra).
+  \item \textbf{General:} bilinear, mais expressivo (aprende $W$).
+  \item \textbf{Concat:} aproxima-se da atenção aditiva de Bahdanau.
 \end{itemize}
 
-\textbf{Nota:} Já aqui podemos reinterpretar como $Q=s_j$, $K=h_i$, $V=h_i$ —  
-a notação moderna usada depois no Transformer.
+\textbf{Nota:} Luong mostra que todas podem ser reinterpretadas em termos modernos como $Q=s_j$, $K=h_i$, $V=h_i$.
 \end{frame}
+
 
 
 % 4) Solução 2: Self-Attention (intra-sequência)
