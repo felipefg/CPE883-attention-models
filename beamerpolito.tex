@@ -36,11 +36,10 @@
 % Evolução: LSTM → Atenção → Transformer (apenas frames)
 % ============================
 
-\section{Evolução: LSTM \texorpdfstring{$\rightarrow$}{->} Atenção \texorpdfstring{$\rightarrow$}{->} Transformer}
+\section{Motivação e Histórico}
 
 
 \begin{frame}{Redes Neurais Recorrentes}
-	\framesubtitle{Motivação}
 
 	\begin{figure}[h]
 		\centering
@@ -57,7 +56,6 @@
 \end{frame}
 
 \begin{frame}{Tipos de camadas RNN}
-	\framesubtitle{Motivação}
 	\begin{columns}[t]
 		\column{0.5\textwidth}
 		\begin{center}
@@ -108,27 +106,13 @@
 		\item Encoder LSTM lê $(x_1,\dots,x_n)$ e produz estados $h_t$; o contexto é o último estado $c=h_n$.
 		\item Decoder LSTM gera $(y_1,\dots,y_m)$ condicionado a $c$.
 	\end{itemize}
-	\[
-		\begin{aligned}
-			i_t & = \sigma(W_i x_t + U_i h_{t-1} + b_i),\quad
-			f_t = \sigma(W_f x_t + U_f h_{t-1} + b_f),              \\
-			o_t & = \sigma(W_o x_t + U_o h_{t-1} + b_o),\quad
-			\tilde{c}_t = \tanh(W_c x_t + U_c h_{t-1} + b_c),       \\
-			c_t & = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t,\quad
-			h_t = o_t \odot \tanh(c_t).
-		\end{aligned}
-	\]
 	\begin{itemize}
 		\item \textbf{Gargalo}: toda a informação comprimida em $c=h_n$.
-	\end{itemize}
-\end{frame}
-
-% 2) Limitações do LSTM
-\begin{frame}{Limitações do LSTM (motivação para atenção)}
-	\begin{itemize}
-		\item Processamento \textbf{sequencial} $\Rightarrow$ baixa paralelização.
-		\item \textbf{Dependências longas} ainda são difíceis (mesmo com portas).
-		\item \textbf{Gargalo do contexto} (vetor único) degrada qualidade em frases longas.
+		\begin{itemize}
+			\item Processamento \textbf{sequencial} $\Rightarrow$ baixa paralelização.
+			\item \textbf{Dependências longas} ainda são difíceis (mesmo com portas).
+			\item \textbf{Gargalo do contexto} (vetor único) degrada qualidade em frases longas.
+		\end{itemize}
 	\end{itemize}
 \end{frame}
 
