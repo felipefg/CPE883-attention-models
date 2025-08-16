@@ -117,24 +117,42 @@
 \end{frame}
 
 % 3) Solução 1: Atenção sobre o encoder (Bahdanau/Luong)
-\begin{frame}{Atenção no encoder--decoder (Bahdanau/Luong)}
-	\textbf{Atenção aditiva (Bahdanau):}
-	\[
-		e_{ij} = v^\top \tanh\!\big(W_1 h_i + W_2 s_j\big),\quad
-		\alpha_{ij} = \mathrm{softmax}_i(e_{ij}),\quad
-		c_j = \sum_i \alpha_{ij} h_i .
-	\]
-	\textbf{Atenção multiplicativa (Luong):}
-	\[
-		e_{ij} = s_j^\top W h_i \quad \text{(general)}, \qquad
-		e_{ij} = s_j^\top h_i \quad \text{(dot)}.
-	\]
-	\begin{itemize}
-		\item Para gerar $y_j$, o decoder combina todos os $h_i$ via pesos $\alpha_{ij}$ (alinhamento dinâmico).
-		\item \textbf{Resolve o gargalo}, melhora frases longas e dá interpretabilidade (mapas de atenção).
-		\item Ainda há recursão no decoder (processo sequencial).
-	\end{itemize}
+\begin{frame}{Atenção aditiva (Bahdanau, 2014)}
+\[
+e_{ij} = v^\top \tanh(W_1 h_i + W_2 s_j),\quad
+\alpha_{ij} = \mathrm{softmax}_i(e_{ij}),\quad
+c_j = \sum_i \alpha_{ij} h_i
+\]
+
+\begin{itemize}
+  \item $h_i$: estado oculto do encoder na posição $i$ (representa a palavra $x_i$).
+  \item $s_j$: estado oculto do decoder no passo $j$ (contexto até $y_{j-1}$).
+  \item $e_{ij}$: escore de alinhamento entre $h_i$ e $s_j$ (via rede feedforward).
+  \item $\alpha_{ij}$: pesos normalizados (softmax) → quanto o decoder “olha” para $h_i$.
+  \item $c_j$: contexto dinâmico para gerar $y_j$, combinação de todos os $h_i$.
+\end{itemize}
+
+\textbf{Intuição:} O decoder faz uma busca dinâmica no encoder, escolhendo quais palavras da entrada são mais relevantes a cada passo.
 \end{frame}
+
+\begin{frame}{Atenção multiplicativa (Luong, 2015)}
+\[
+e_{ij} = s_j^\top W h_i \quad \text{(general)}, \qquad
+e_{ij} = s_j^\top h_i \quad \text{(dot)}
+\]
+
+\begin{itemize}
+  \item $s_j$: query → estado oculto do decoder.
+  \item $h_i$: key/value → estado do encoder.
+  \item Produto escalar ou bilinear calcula a similaridade (mais eficiente que Bahdanau).
+  \item O resto do processo é igual: normalização com softmax e contexto $c_j$.
+  \item \textbf{Vantagem:} cálculo mais simples, menos parâmetros, mais rápido.
+\end{itemize}
+
+\textbf{Nota:} Já aqui podemos reinterpretar como $Q=s_j$, $K=h_i$, $V=h_i$ —  
+a notação moderna usada depois no Transformer.
+\end{frame}
+
 
 % 4) Solução 2: Self-Attention (intra-sequência)
 \begin{frame}{Self-Attention: dependências em paralelo}
