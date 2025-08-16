@@ -69,15 +69,16 @@
 			\includegraphics[width=0.33\textwidth]{assets/colah-LSTM-layer.png}
 		\end{figure}
 
-		\tiny\[
-			\begin{aligned}
-				f_t         & = \sigma(W_f \cdot \left[h_{t-1}, x_t \right] + b_f) \\
-				i_t         & = \sigma(W_i \cdot \left[h_{t-1}, x_t \right] + b_i) \\
-				\tilde{C}_t & = \tanh(W_c \cdot \left[h_{t-1}, x_t \right] + b_c)  \\
-				C_t         & = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t          \\
-				o_t         & = \sigma(W_o \cdot \left[h_{t-1}, x_t \right] + b_o) \\
-				h_t         & = o_t \odot \tanh(c_t)
-			\end{aligned}
+		\tiny
+		\[
+		\begin{alignedat}{2}
+			f_t & = \sigma(W_f [h_{t-1}, x_t] + b_f), \quad & 
+			i_t & = \sigma(W_i [h_{t-1}, x_t] + b_i), \\
+			\tilde{C}_t & = \tanh(W_c [h_{t-1}, x_t] + b_c), \quad &
+			C_t & = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t, \\
+			o_t & = \sigma(W_o [h_{t-1}, x_t] + b_o), \quad &
+			h_t & = o_t \odot \tanh(C_t)
+		\end{alignedat}
 		\]
 		\column{0.5\textwidth}
 		\begin{center}
