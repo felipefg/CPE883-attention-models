@@ -165,23 +165,48 @@ Resolve o gargalo do vetor fixo único ($h_n$) e permite traduções mais fiéis
 \textbf{Três variantes de scoring:}
 \[
 \begin{aligned}
-e_{ij} &= s_j^\top h_i && \text{(dot)} \\
+e_{ij} &= v^\top \tanh(W [s_j; h_i]) && \text{(concat, similar ao Bahdanau)} \\
 e_{ij} &= s_j^\top W h_i && \text{(general)} \\
-e_{ij} &= v^\top \tanh(W [s_j; h_i]) && \text{(concat, similar ao Bahdanau)}
+e_{ij} &= s_j^\top h_i && \text{(dot)}
 \end{aligned}
 \]
 
 \begin{itemize}
   \item $s_j$: query → estado oculto do decoder.
   \item $h_i$: key/value → estado do encoder.
-  \item \textbf{Dot:} mais simples e rápido (nenhum parâmetro extra).
-  \item \textbf{General:} bilinear, mais expressivo (aprende $W$).
   \item \textbf{Concat:} aproxima-se da atenção aditiva de Bahdanau.
+  \item \textbf{General:} bilinear, mais expressivo (aprende $W$).
+  \item \textbf{Dot:} mais simples e rápido (nenhum parâmetro extra).
 \end{itemize}
 
 \textbf{Nota:} Luong mostra que todas podem ser reinterpretadas em termos modernos como $Q=s_j$, $K=h_i$, $V=h_i$.
 \end{frame}
 
+\begin{frame}{Global vs Local Attention (Luong, 2015)}
+\begin{columns}[c]
+  \column{0.35\textwidth}
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{assets/global attention.png}
+      \caption*{Global Attention}
+    \end{figure}
+  \column{0.35\textwidth}
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{assets/local attention.png}
+      \caption*{Local Attention}
+    \end{figure}
+\end{columns}
+
+\begin{itemize}
+  \item \textbf{Global:} o decoder olha para \emph{todos} os estados do encoder em cada passo $j$.  
+  \item \textbf{Local:} o decoder olha apenas para uma \emph{janela limitada} de estados do encoder ao redor de uma posição prevista $p_t$.  
+  \item O cálculo do contexto $c_j$ é o mesmo, mas a diferença está no \textbf{escopo de atenção}.  
+\end{itemize}
+
+\textbf{Resumo:}  
+Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alinhamentos monotônicos mais naturalmente.
+\end{frame}
 
 
 % 4) Solução 2: Self-Attention (intra-sequência)
@@ -201,6 +226,15 @@ e_{ij} &= v^\top \tanh(W [s_j; h_i]) && \text{(concat, similar ao Bahdanau)}
 		\item Comparativo: RNN/LSTM exige $n$ passos sequenciais; self-attention faz um passo paralelo com custo $\mathcal{O}(n^2)$.
 	\end{itemize}
 \end{frame}
+
+\begin{frame}{Arquitetura pré-transformer}
+\begin{figure}
+  \centering
+  \includegraphics[height=0.75\textheight]{assets/The-framework-of-additive-attention-mechanism-in-decoder.png}
+  \caption{Exemplo de arquitetura pré-transformer (aditiva)}
+\end{figure}
+\end{frame}
+
 
 % 5) Transformer: tirar LSTM, adicionar posição + FFN e empilhar blocos
 \begin{frame}{Attention Is All You Need: nascendo o Transformer}
