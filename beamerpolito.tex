@@ -347,40 +347,9 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 	\end{itemize}
 \end{frame}
 
-
-%===========================
-% FUNDAMENTOS
-%===========================
-\begin{chapter}[assets/background_negative]{sintefgreen}{Fundamentos}\end{chapter}
-
-\section{Modelos de Sequência}
-\begin{frame}{RNN/GRU/LSTM — limites práticos}
-	\begin{itemize}[<+->]
-		\item Cálculo sequencial $\Rightarrow$ baixa paralelização
-		\item Dependências longas: vanish/explode (mitigado, não resolvido)
-		\item Memória finita e custo de treino elevado para contextos longos
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{LSTM + Attention (Encoder--Decoder)}
-	\framesubtitle{Atenção aditiva (Bahdanau)}
-	\begin{block}{Equações}
-		\small
-		\[
-			e_{ij} = v^\top \tanh\!\big(W_1\,h_i + W_2\,s_j\big), \quad
-			\alpha_{ij} = \mathrm{softmax}_i(e_{ij}), \quad
-			c_j = \sum_i \alpha_{ij} h_i
-		\]
-	\end{block}
-	\begin{itemize}[<+->]
-		\item \textbf{Alinhamento} dinâmico entre estados do encoder e passos do decoder
-		\item Reduz gargalos de um único vetor de contexto
-	\end{itemize}
-\end{frame}
-
 \section{Embeddings \& Interpretações}
 \begin{frame}{Word/Subword Embeddings}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Estáticos (Word2Vec, GloVe) vs. Contextuais (ELMo, BERT)
 		\item Subword (BPE/Unigram) para robustez morfológica
 		\item Análogos em outras modalidades: patches (ViT), time2vec (TS), node2vec (grafos)
@@ -388,7 +357,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 \end{frame}
 
 \begin{frame}{Interpretação Geométrica da Atenção}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item $Q,K,V$ são projeções lineares do latente
 		\item Similaridade (coseno/dot) guia uma \emph{combinação convexa} de $V$
 		\item Multi-head $\Rightarrow$ múltiplas métricas/projeções simultâneas
@@ -401,7 +370,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 			\mathrm{Att}(Q,K,V) \;=\; \mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)\,V
 		\]
 	\end{block}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Máscara causal/atencional conforme a tarefa
 		\item Complexidade $\mathcal{O}(n^2)$ em tempo/memória
 		\item Gradientes e saturação da softmax
@@ -409,42 +378,16 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 \end{frame}
 
 \begin{frame}{Positional Encodings}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Absolutos senoidais vs. aprendidos
 		\item Relativos e RoPE (rotary): melhor generalização/composição
 		\item Impacto em extrapolação e contextos longos
 	\end{itemize}
 \end{frame}
 
-%===========================
-% TRANSFORMERS
-%===========================
-\begin{chapter}[assets/background_negative]{sinteflightgreen}{Transformers}\end{chapter}
-
-\section{Arquiteturas \& Variantes}
-\begin{frame}{Arquiteturas Transformer}
-	\begin{itemize}[<+->]
-		\item \textbf{Encoder--Decoder}, \textbf{Encoder-only}, \textbf{Decoder-only}
-		\item Bloco: MHSA + FFN, \textit{residual} + \textit{layer norm}
-		\item Pré-norm vs. pós-norm (estabilidade de treino)
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Atenções Eficientes}
-	\begin{itemize}[<+->]
-		\item \textbf{Esparsidade}: Longformer/BigBird (padrões locais+globais)
-		\item \textbf{Aproximação}: Linformer, Nyströmformer
-		\item \textbf{Kernels}: Performer (favor+), FlashAttention (IO-aware)
-		\item \textbf{Outros}: Reformer (LSH)
-	\end{itemize}
-	\begin{block}{Trade-off}
-		Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda controlada de exatidão e/ou restrições de padrão.
-	\end{block}
-\end{frame}
-
 \section{Treino \& Hiperparâmetros}
 \begin{frame}{Práticas de Treino}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item AdamW, warmup + decaimento; label smoothing quando aplicável
 		\item Regularização: dropout, stochastic depth, weight decay
 		\item AMP/mixed precision, grad clipping, checkpointing
@@ -453,7 +396,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 \end{frame}
 
 \begin{frame}{Hiperparâmetros Essenciais}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Profundidade, $d_{\text{model}}$, \#heads, $d_{ff}$, dropout
 		\item Comprimento de contexto, batch size, \textit{LR schedule}
 		\item Específicos: tokenização (LM), \textit{patch size} (ViT), janela/patch (TS)
@@ -461,30 +404,65 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 \end{frame}
 
 \begin{frame}{Qual tamanho ideal? (Scaling)}
-	\begin{itemize}[<+->]
-		\item Leis de escala vs. limite de dados/compute
-		\item Tokens vs. parâmetros; saturação com contexto
-		\item Regra prática: dimensione para o dataset e o \textit{budget} de inferência
-	\end{itemize}
+\begin{itemize}
+  \item \textbf{Leis de escala \cite{kaplan2020scaling}:} 
+        desempenho cresce com $\uparrow$ dados, parâmetros e compute, até saturar.
+        
+  \item \textbf{Trade-offs:} 
+        muitos parâmetros + poucos dados $\to$ overfitting; 
+        muitos dados + poucos parâmetros $\to$ subutilização.
+
+  \item \textbf{Tokens vs. parâmetros:} 
+        ideal quando \#tokens $\approx$ múltiplos de \#parâmetros 
+        \cite{hoffmann2022training}.
+
+  \item \textbf{Contexto:} 
+        janelas maiores ajudam, mas ganhos saturam.
+
+  \item \textbf{Regra prática:} 
+        dimensione conforme dataset + compute + budget de inferência.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Resumo:} não há tamanho ótimo universal — depende do equilíbrio entre
+dados, parâmetros e recursos disponíveis.
 \end{frame}
+
+
 
 %===========================
 % APLICAÇÕES
 %===========================
-\begin{chapter}[assets/background_negative]{sintefyellow}{Aplicações}\end{chapter}
 
-\section{Séries Temporais}
+
+% ------ Frame 1: Explicação ------
 \begin{frame}{Atenção em Séries Temporais}
-	\begin{itemize}[<+->]
-		\item Codificação temporal: absolutos/relativos, time2vec, calendários/sazonalidade
-		\item Exógenas e \textit{cross-attention}; \textit{patching} para contextos longos
-		\item Tarefas: previsão, imputação, detecção de anomalias
-	\end{itemize}
+\begin{itemize}
+  \item \textbf{Codificação temporal:} absolutos/relativos; \textit{Time2Vec}; embeddings de calendário (hora/dia/sazonalidade).
+  \item \textbf{Exógenas + cross-attention:} integrar variáveis externas (clima, preços, feriados) à série-alvo.
+  \item \textbf{Contextos longos:} \textit{patching} (janelas), sparsity e hashing; ganhos de janelas muito grandes tendem a saturar.
+  \item \textbf{Por que atenção:} foca nos trechos relevantes do histórico e alinha padrões não estacionários/irregulares.
+  \item \textbf{Tarefas:} previsão (forecasting), imputação (faltantes) e detecção de anomalias.
+\end{itemize}
 \end{frame}
+
+% ------ Frame 2: Referências (GitHub) ------
+\begin{frame}{Modelos recentes (com código)}
+\footnotesize
+\begin{itemize}
+  \item \href{https://github.com/zhouhaoyi/Informer2020}{Informer (AAAI'21)} — atenção esparsa p/ sequências longas.
+  \item \href{https://github.com/thuml/Autoformer}{Autoformer (NeurIPS'21)} — auto-correlação + decomposição.
+  \item \href{https://github.com/yuqinie98/PatchTST}{PatchTST (ICLR'23)} — \textit{patching} / channel-independent.
+  \item \href{https://github.com/thuml/TimesNet}{TimesNet (ICLR'23)} — modelagem de variação temporal 2D.
+  \item \href{https://github.com/natmourajr/CPE883-2025-02/tree/main/models/tsdiffusion}{TSDiffusion (2023)} - difusão para séries temporais.
+\end{itemize}
+\end{frame}
+
+
 
 \section{Language Models}
 \begin{frame}{Language Models (LM)}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Atenção \textbf{causal}, \textit{next-token} e \textit{masking}
 		\item Pré-treino vs. \textit{fine-tuning}; Instrução/LoRA/Adapters
 		\item Métricas: perplexidade e tarefas \textit{downstream}
@@ -493,7 +471,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 
 \section{Vision Transformer}
 \begin{frame}{Vision Transformer (ViT)}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Imagem $\rightarrow$ \textit{patches} + \texttt{[CLS]} token
 		\item Posicionais 2D; augmentations (RandAug, Mixup/CutMix)
 		\item Transfer: \textit{linear probe} vs. \textit{fine-tune}
@@ -508,7 +486,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 			\alpha_{ij}=\mathrm{softmax}_j\!\left(\mathrm{LeakyReLU}\!\big(a^\top[Wh_i \,||\, Wh_j]\big)\right)
 		\]
 	\end{block}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Multi-head; sobre-\textit{smoothing} e escalabilidade
 		\item Heterógrafos e atenção relacional
 	\end{itemize}
@@ -517,11 +495,11 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 %===========================
 % ESCALA & COMPRESSÃO
 %===========================
-\begin{chapter}[assets/background_negative]{sintefred}{Escala \& Compressão}\end{chapter}
+
 
 \section{MoE, Pruning, Distillation}
 \begin{frame}{Mixture of Experts (MoE)}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item \textit{Gating} top-1/top-2; balanceamento de carga
 		\item Roteamento esparso: capacidade vs. ociosidade
 		\item Custos de comunicação e estabilidade no treino
@@ -529,7 +507,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 \end{frame}
 
 \begin{frame}{Pruning}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Não estruturado (magnitude) vs. estruturado (canal/bloco, n:m)
 		\item Iterativo vs. \textit{one-shot}; impacto em latência real
 		\item Interação com quantização e \textit{sparsity-aware kernels}
@@ -543,7 +521,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 			\mathcal{L}=(1-\lambda)\,\mathrm{CE}(y,s)+\lambda\,T^2\,\mathrm{KL}\!\big(p_T \,\|\, q_T\big)
 		\]
 	\end{block}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item \textit{Teacher} $\rightarrow$ \textit{student}; temperatura $T$
 		\item \textit{Intermediate layer hints}; \textit{task-specific} vs. generalista
 		\item Benefícios: latência/energia e \textit{edge deployment}
@@ -553,11 +531,11 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 %===========================
 % INTERPRETAÇÃO & LIMITES
 %===========================
-\begin{chapter}[assets/background_negative]{sinteflilla}{Interpretação \& Limitações}\end{chapter}
+
 
 \section{Diagnóstico \& Limites}
 \begin{frame}{Interpretação \& Diagnóstico}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item \textit{Attention rollout/flow}; atenção $\neq$ causalidade
 		\item \textit{Probing} de camadas; ablação de cabeças
 		\item Ferramentas de \textit{explainability} por domínio
@@ -565,7 +543,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 \end{frame}
 
 \begin{frame}{Limitações \& Trade-offs}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Custo $\mathcal{O}(n^2)$, viés de dados, \textit{OOD} robustness
 		\item Contaminação de treino e privacidade
 		\item Energia/carbono e restrições de hardware
@@ -577,7 +555,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 %===========================
 \section{Conclusões}
 \begin{frame}{Conclusões}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Atenção como princípio unificador em sequência, visão e grafos
 		\item Escolha guiada por dados, métricas e orçamento (treino/inferência)
 		\item Escala e compressão (MoE/pruning/distillation) para produção
