@@ -25,7 +25,7 @@
 % --- Metadados ---
 \title{Attention Models: da motivação às variantes modernas}
 \subtitle{Intuição geométrica, formulação matemática e aplicações}
-\author{Seu Nome}
+\author{Rodrigo Petrus Domingues, Felipe Grael e Vivian}
 \date{\today}
 
 \begin{document}
@@ -434,7 +434,7 @@ dados, parâmetros e recursos disponíveis.
 % APLICAÇÕES
 %===========================
 
-
+\section{Séries Temporais}
 % ------ Frame 1: Explicação ------
 \begin{frame}{Atenção em Séries Temporais}
 \begin{itemize}
@@ -461,13 +461,48 @@ dados, parâmetros e recursos disponíveis.
 
 
 \section{Language Models}
+% ------ Frame 1: Explicação (LMs) ------
 \begin{frame}{Language Models (LM)}
-	\begin{itemize}
-		\item Atenção \textbf{causal}, \textit{next-token} e \textit{masking}
-		\item Pré-treino vs. \textit{fine-tuning}; Instrução/LoRA/Adapters
-		\item Métricas: perplexidade e tarefas \textit{downstream}
-	\end{itemize}
+\begin{itemize}
+  \item \textbf{Atenção causal} (\textit{masked self-attention}): máscara triangular impede olhar o futuro.
+  \item \textbf{Objetivo autoregressivo}: minimizar $\;-\sum_{t}\log p(x_t \mid x_{<t})$ (\textit{next-token}).
+  \item \textbf{Pré-treino} (corpus amplo, tarefa genérica) \textbf{vs. fine-tuning} (tarefa/estilo): 
+        \emph{instruction tuning} (FLAN), RLHF (InstructGPT).
+  \item \textbf{PEFT} (ajuste eficiente): \emph{LoRA}, \emph{Adapters} (congelar base + poucos params).
+  \item \textbf{Métricas}: 
+        \emph{perplexity} (surpresa média por token) e \emph{downstream} (ex.: SuperGLUE, MMLU).
+\end{itemize}
 \end{frame}
+% ------ Frame 2: Referências (links) ------
+% ------ Frame 2: Implementações (GitHub) ------
+% ------ Frame: Implementações (GitHub) com anos ------
+\begin{frame}{Language Models — Implementações (GitHub)}
+\scriptsize
+\begin{columns}[t]
+  \column{0.5\textwidth}
+  \begin{itemize}
+    \item \href{https://github.com/karpathy/nanoGPT}{karpathy/nanoGPT} \textbf{(2022)} — GPT minimalista
+    \item \href{https://github.com/huggingface/transformers}{huggingface/transformers} \textbf{(2019)} — biblioteca SOTA
+    \item \href{https://github.com/EleutherAI/gpt-neox}{EleutherAI/gpt-neox} \textbf{(2022)} — treino LLMs em larga escala
+    \item \href{https://github.com/meta-llama/llama}{meta-llama/llama} \textbf{(2023)} — código/pesos Llama
+    \item \href{https://github.com/harvardnlp/annotated-transformer}{harvardnlp/annotated-transformer} \textbf{(2018)} — Transformer anotado
+  \end{itemize}
+
+  \column{0.5\textwidth}
+  \begin{itemize}
+    \item \href{https://github.com/huggingface/trl}{huggingface/trl} \textbf{(2020)} — SFT, PPO/DPO, RLHF
+    \item \href{https://github.com/deepspeedai/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat}{DeepSpeed-Chat} \textbf{(2023)} — pipeline RLHF
+    \item \href{https://github.com/OpenRLHF/OpenRLHF}{OpenRLHF/OpenRLHF} \textbf{(2023)} — RLHF escalável
+    \item \href{https://github.com/huggingface/peft}{huggingface/peft} \textbf{(2023)} — PEFT (LoRA, QLoRA, etc.)
+    \item \href{https://github.com/adapter-hub/adapters}{adapter-hub/adapters} \textbf{(2020)} — biblioteca de Adapters
+    \item \href{https://github.com/microsoft/LoRA}{microsoft/LoRA} \textbf{(2021)} — implementação LoRA oficial
+    \item \href{https://github.com/google-research/FLAN}{google-research/FLAN} \textbf{(2021)} — dados p/ instruction tuning
+  \end{itemize}
+\end{columns}
+\end{frame}
+
+
+
 
 \section{Vision Transformer}
 \begin{frame}{Vision Transformer (ViT)}
@@ -489,108 +524,6 @@ dados, parâmetros e recursos disponíveis.
 	\begin{itemize}
 		\item Multi-head; sobre-\textit{smoothing} e escalabilidade
 		\item Heterógrafos e atenção relacional
-	\end{itemize}
-\end{frame}
-
-%===========================
-% ESCALA & COMPRESSÃO
-%===========================
-
-
-\section{MoE, Pruning, Distillation}
-\begin{frame}{Mixture of Experts (MoE)}
-	\begin{itemize}
-		\item \textit{Gating} top-1/top-2; balanceamento de carga
-		\item Roteamento esparso: capacidade vs. ociosidade
-		\item Custos de comunicação e estabilidade no treino
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Pruning}
-	\begin{itemize}
-		\item Não estruturado (magnitude) vs. estruturado (canal/bloco, n:m)
-		\item Iterativo vs. \textit{one-shot}; impacto em latência real
-		\item Interação com quantização e \textit{sparsity-aware kernels}
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Distillation}
-	\begin{block}{Perda típica (Hinton)}
-		\small
-		\[
-			\mathcal{L}=(1-\lambda)\,\mathrm{CE}(y,s)+\lambda\,T^2\,\mathrm{KL}\!\big(p_T \,\|\, q_T\big)
-		\]
-	\end{block}
-	\begin{itemize}
-		\item \textit{Teacher} $\rightarrow$ \textit{student}; temperatura $T$
-		\item \textit{Intermediate layer hints}; \textit{task-specific} vs. generalista
-		\item Benefícios: latência/energia e \textit{edge deployment}
-	\end{itemize}
-\end{frame}
-
-%===========================
-% INTERPRETAÇÃO & LIMITES
-%===========================
-
-
-\section{Diagnóstico \& Limites}
-\begin{frame}{Interpretação \& Diagnóstico}
-	\begin{itemize}
-		\item \textit{Attention rollout/flow}; atenção $\neq$ causalidade
-		\item \textit{Probing} de camadas; ablação de cabeças
-		\item Ferramentas de \textit{explainability} por domínio
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Limitações \& Trade-offs}
-	\begin{itemize}
-		\item Custo $\mathcal{O}(n^2)$, viés de dados, \textit{OOD} robustness
-		\item Contaminação de treino e privacidade
-		\item Energia/carbono e restrições de hardware
-	\end{itemize}
-\end{frame}
-
-%===========================
-% CONCLUSÕES
-%===========================
-\section{Conclusões}
-\begin{frame}{Conclusões}
-	\begin{itemize}
-		\item Atenção como princípio unificador em sequência, visão e grafos
-		\item Escolha guiada por dados, métricas e orçamento (treino/inferência)
-		\item Escala e compressão (MoE/pruning/distillation) para produção
-	\end{itemize}
-\end{frame}
-
-%===========================
-% Q&A
-%===========================
-\backmatter
-\begin{frame}
-	\frametitle{Perguntas?}
-	\centering
-	Obrigado!
-\end{frame}
-
-%===========================
-% BACKUP (opc.)
-%===========================
-\section{Backup (Opcional)}
-\begin{frame}{Equações úteis (resumo)}
-	\small
-	\begin{itemize}
-		\item Scaled dot-product, aditiva (Bahdanau)
-		\item Atenção relativa e RoPE
-		\item GAT detalhado; máscaras causais
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Hiperparâmetros por tarefa (resumo)}
-	\small
-	\begin{itemize}
-		\item LM: contexto, BPE, heads/profundidade típicos
-		\item ViT: patch size, MLP ratio, augmentations
-		\item TS: janela, patching, covariáveis, perdas (MAE/MSE/Quantile)
 	\end{itemize}
 \end{frame}
 
