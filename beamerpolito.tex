@@ -117,7 +117,7 @@
 \end{frame}
 
 % 3) Solução 1: Atenção sobre o encoder (Bahdanau/Luong)
-\begin{frame}{Atenção aditiva (Bahdanau, 2014)}
+\begin{frame}{Atenção aditiva \cite{bahdanau2014neural}}
 \[
 e_{ij} = a(s_{i-1}, h_j), \quad
 \alpha_{ij} = \frac{\exp(e_{ij})}{\sum_{k=1}^{T_x} \exp(e_{ik})}, \quad
@@ -161,7 +161,7 @@ Resolve o gargalo do vetor fixo único ($h_n$) e permite traduções mais fiéis
 \end{frame}
 
 
-\begin{frame}{Atenção multiplicativa (Luong, 2015)}
+\begin{frame}{Atenção multiplicativa \cite{luong2015effective}}
 \textbf{Três variantes de scoring:}
 \[
 \begin{aligned}
@@ -182,7 +182,7 @@ e_{ij} &= s_j^\top h_i && \text{(dot)}
 \textbf{Nota:} Luong mostra que todas podem ser reinterpretadas em termos modernos como $Q=s_j$, $K=h_i$, $V=h_i$.
 \end{frame}
 
-\begin{frame}{Global vs Local Attention (Luong, 2015)}
+\begin{frame}{Global vs Local Attention \cite{luong2015effective}}
 \begin{columns}[c]
   \column{0.35\textwidth}
     \begin{figure}
@@ -231,13 +231,13 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 \begin{figure}
   \centering
   \includegraphics[height=0.75\textheight]{assets/The-framework-of-additive-attention-mechanism-in-decoder.png}
-  \caption{Exemplo de arquitetura pré-transformer (aditiva)}
+  \caption{Exemplo de arquitetura pré-transformer (aditiva) \cite{gu2022pointer}}
 \end{figure}
 \end{frame}
 
 
 % 5) Transformer: tirar LSTM, adicionar posição + FFN e empilhar blocos
-\begin{frame}{Attention Is All You Need: nascendo o Transformer}
+\begin{frame}{Attention Is All You Need \cite{vaswani2017attention}: nascendo o Transformer}
 	\begin{itemize}
 		\item \textbf{Remove} completamente a recorrência (sem LSTM).
 		\item \textbf{Positional encodings} preservam ordem:
@@ -245,6 +245,16 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 			      PE_{(pos,2i)}=\sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right),\quad
 			      PE_{(pos,2i+1)}=\cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right).
 		      \]
+	\end{itemize}
+	\begin{figure}
+	\centering
+	\includegraphics[height=0.55\textheight,width=0.7\linewidth]{assets/positional-encoding.png}
+	\caption{Exemplo de codificação posicional senoidal \cite{vaswani2017attention}}
+	\end{figure}	
+\end{frame}
+
+\begin{frame}{Bloco Transformer e arquitetura}
+	\begin{itemize}
 		\item Cada \textbf{bloco Transformer} (pré-norm, forma comum):
 		      \[
 			      \begin{aligned}
@@ -253,20 +263,22 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 			      \end{aligned}
 		      \]
 		\item Empilha-se vários blocos de atenção+FFN $\Rightarrow$ \textbf{arquitetura Transformer}.
+	
+		\item \textbf{Máscara causal} (para LMs) impede olhar o futuro:
+		\[
+			\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}+M\right),
+			\quad
+			M_{ij}=\begin{cases}
+				0,       & j\le i \\
+				-\infty, & j>i
+			\end{cases}
+		\]
 	\end{itemize}
 \end{frame}
 
 % 6) Máscara causal e síntese da evolução
 \begin{frame}{Máscara causal e síntese da evolução}
-	\textbf{Máscara causal} (para LMs) impede olhar o futuro:
-	\[
-		\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}+M\right),
-		\quad
-		M_{ij}=\begin{cases}
-			0,       & j\le i \\
-			-\infty, & j>i
-		\end{cases}
-	\]
+
 	\textbf{Linha do tempo (síntese):}
 	\begin{itemize}
 		\item LSTM encoder--decoder: contexto único $c=h_n$ (gargalo).
