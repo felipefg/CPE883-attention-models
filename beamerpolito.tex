@@ -235,7 +235,7 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 \end{figure}
 \end{frame}
 
-
+\section{Transformers}
 % 5) Transformer: tirar LSTM, adicionar posição + FFN e empilhar blocos
 \begin{frame}{Attention Is All You Need \cite{vaswani2017attention}: nascendo o Transformer}
 	\begin{itemize}
@@ -276,8 +276,67 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 	\end{itemize}
 \end{frame}
 
+\begin{frame}{Arquiteturas Transformer e Aplicações}
+\begin{columns}[t]
+  % Coluna 1
+  \column{0.33\textwidth}
+  \textbf{Encoder--Decoder} \\
+  (Transformer original, 2017)
+  \begin{itemize}
+    \item Tradução automática
+    \item Sumarização
+    \item Diálogo
+    \item Captioning
+  \end{itemize}
+
+  % Coluna 2
+  \column{0.33\textwidth}
+  \textbf{Encoder-only} \\
+  (BERT, RoBERTa, DistilBERT)
+  \begin{itemize}
+    \item Classificação de texto
+    \item NER (entidades)
+    \item QA (extração de trechos)
+    \item Análise semântica
+  \end{itemize}
+
+  % Coluna 3
+  \column{0.33\textwidth}
+  \textbf{Decoder-only} \\
+  (GPT, LLaMA, etc.)
+  \begin{itemize}
+    \item Modelos de linguagem
+    \item Geração de texto
+    \item Completamento de prompts
+    \item Story generation
+  \end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Arquiteturas Transformer: encoder e decoder \cite{vaswani2017attention}}
+\begin{columns}[t]	
+	\column{0.33\textwidth}
+	\begin{figure}
+		\centering
+		\includegraphics[height=0.75\textheight]{assets/Transformer.png}
+		\caption{Transformer Encoder e Decoder}
+	\end{figure}
+	\column{0.33\textwidth}
+	\begin{figure}
+		\centering
+		\includegraphics[height=0.75\textheight]{assets/transformer-multi-head-attention.png}
+		\caption{Multi-Head Attention}
+	\end{figure}
+	\column{0.33\textwidth}
+	\begin{figure}
+		\centering
+		\includegraphics[height=0.75\textheight]{assets/transformer-scaled-dot-attention.png}
+		\caption{Multi-Head Attention}
+	\end{figure}
+\end{columns}
+\end{frame}
 % 6) Máscara causal e síntese da evolução
-\begin{frame}{Máscara causal e síntese da evolução}
+\begin{frame}{Resumo da evolução dos modelos}
 
 	\textbf{Linha do tempo (síntese):}
 	\begin{itemize}
