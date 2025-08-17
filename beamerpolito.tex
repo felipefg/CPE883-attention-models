@@ -58,15 +58,16 @@
 \begin{frame}{Tipos de camadas RNN}
 	\begin{columns}[t]
 		\column{0.5\textwidth}
+		\vspace{-5mm}
 		\begin{center}
 			\textbf{LSTM}
 		\end{center}
-
+		\vspace{-5mm}
 		\begin{figure}[h]
 			\centering
-			\includegraphics[width=0.33\textwidth]{assets/colah-LSTM-layer.png}
+			\includegraphics[width=0.5\textwidth]{assets/LSTM_Gates.png}
 		\end{figure}
-
+		\vspace{-2mm}
 		\tiny
 		\[
 		\begin{alignedat}{2}
@@ -79,20 +80,21 @@
 		\end{alignedat}
 		\]
 		\column{0.5\textwidth}
+		\vspace{-5mm}
 		\begin{center}
 			\textbf{GRU}
 		\end{center}
-
+		\vspace{-5mm}
 		\begin{figure}[h]
 			\centering
-			\includegraphics[width=0.33\textwidth]{assets/colah-GRU-layer.png}
+			\includegraphics[width=0.5\textwidth]{assets/colah-GRU-layer.png}
 		\end{figure}
-
+		\vspace{-2mm}
 		\tiny\[
 			\begin{aligned}
-				z_t         & = \sigma(W_z \cdot \left[h_{t-1}, x_t \right])        \\
-				r_t         & = \sigma(W_r \cdot \left[h_{t-1}, x_t \right])        \\
-				\tilde{h}_t & = \tanh(W \cdot \left[r_t \odot h_{t-1}, x_t \right]) \\
+				z_t         & = \sigma(W_z \cdot [h_{t-1}, x_t ])               \\
+				r_t         & = \sigma(W_r \cdot [h_{t-1}, x_t ])               \\
+				\tilde{h}_t & = \tanh(W \cdot [r_t \odot h_{t-1}, x_t ])        \\
 				h_t         & = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
 			\end{aligned}
 		\]
@@ -100,12 +102,11 @@
 	\end{columns}
 \end{frame}
 
-% 1) LSTM baseline: encoder-decoder e gargalo
-\begin{frame}{LSTM como baseline para NMT}
-	\begin{itemize}
-		\item Encoder LSTM lê $(x_1,\dots,x_n)$ e produz estados $h_t$; o contexto é o último estado $c=h_n$.
-		\item Decoder LSTM gera $(y_1,\dots,y_m)$ condicionado a $c$.
-	\end{itemize}
+\begin{frame}{Arquitetura Seq2Seq para Tradução}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{assets/Seq2Seq_NMT.png}
+	\end{figure}
 	\begin{itemize}
 		\item \textbf{Gargalo}: toda a informação comprimida em $c=h_n$.
 		\begin{itemize}
