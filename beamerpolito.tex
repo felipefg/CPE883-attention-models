@@ -427,13 +427,89 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Positional Encodings}
-	\begin{itemize}
-		\item Absolutos senoidais vs. aprendidos
-		\item Relativos e RoPE (rotary): melhor generalização/composição
-		\item Impacto em extrapolação e contextos longos
-	\end{itemize}
+% ---------- Frame 1 ----------
+\begin{frame}{Positional Encodings — Absolutos}
+\begin{itemize}
+  \item \textbf{Senoidais \cite{vaswani2017attention}:}
+  \[
+  PE(pos,2i)=\sin\!\Big(\tfrac{pos}{10000^{2i/d}}\Big),\quad
+  PE(pos,2i{+}1)=\cos\!\Big(\tfrac{pos}{10000^{2i/d}}\Big)
+  \]
+  \begin{itemize}
+    \item Frequências diferentes em cada dimensão.
+    \item Permitem extrapolação por periodicidade.
+    \item Risco: aliasing (padrões que se repetem em posições distantes).
+  \end{itemize}
+
+  \item \textbf{Aprendidos:}
+  \[
+  z_{pos}=x_{pos}+P_{pos},\;\; P\in\mathbb{R}^{L_{\max}\times d}
+  \]
+  \begin{itemize}
+    \item Mais flexíveis e adaptados à tarefa.
+    \item \textbf{Limite}: não extrapolam para posições > $L_{\max}$.
+  \end{itemize}
+\end{itemize}
 \end{frame}
+
+% ---------- Frame 2 ----------
+\begin{frame}{Positional Encodings — Relativos e Bias}
+\begin{itemize}
+  \item \textbf{Shaw et al. (2018):}
+  \[
+  e_{ij}=q_i^\top(k_j + r_{i-j})
+  \]
+  ou com bias $b_{i-j}$. Codifica \textbf{distâncias} em vez de posições absolutas.
+
+  \item \textbf{T5 (Raffel et al., 2020):}
+  \[
+  e_{ij}=q_i^\top k_j + B_{\text{bucket}(i-j)}
+  \]
+  \begin{itemize}
+    \item “Baldes” de distâncias (log-escalados).
+    \item Barato, simples, bom para extrapolação moderada.
+  \end{itemize}
+
+  \item \textbf{ALiBi (Press et al., 2022):}
+  \[
+  e_{ij} \;+\; m_h\,(i-j)
+  \]
+  \begin{itemize}
+    \item Inclinação linear por head.
+    \item Suporta janelas muito maiores sem retraining.
+    \item Praticamente custo zero.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+% ---------- Frame 3 ----------
+\begin{frame}{Positional Encodings — RoPE e Impacto Prático}
+\begin{itemize}
+  \item \textbf{RoPE (Su et al., 2021):} aplica rotação dependente da posição:
+  \[
+  \tilde{x}_{2i},\tilde{x}_{2i+1} =
+  \begin{cases}
+  x_{2i}\cos\theta - x_{2i+1}\sin\theta \\
+  x_{2i}\sin\theta + x_{2i+1}\cos\theta
+  \end{cases},\quad
+  \theta=\tfrac{pos}{10000^{2i/d}}
+  \]
+  \begin{itemize}
+    \item Produto $q^\top k$ passa a depender de $(pos_q - pos_k)$.
+    \item $\Rightarrow$ natural para codificar deslocamentos/ordem relativa.
+  \end{itemize}
+
+  \item \textbf{Impacto prático:}
+  \begin{itemize}
+    \item Absolutos aprendidos: limitados ao $L_{\max}$.
+    \item Senoidais: extrapolam mas sofrem com aliasing.
+    \item Relativos (T5, ALiBi, RoPE): melhor estabilidade para contextos longos.
+  \end{itemize}
+
+  \item \textbf{Hoje}: ALiBi e RoPE são o padrão em LLMs de longo contexto.
+\end{itemize}
+\end{frame}
+
+
 
 \section{Treino \& Hiperparâmetros}
 \begin{frame}{Práticas de Treino}
