@@ -347,46 +347,6 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 	\end{itemize}
 \end{frame}
 
-%===========================
-% ROADMAP
-%===========================
-\section{Roteiro}
-\begin{frame}{Roteiro da Apresentação}
-	\begin{itemize}[<+->]
-		\item Motivação e histórico
-		\item Modelos de sequência (RNN/LSTM) + Attention
-		\item Embeddings, interpretação geométrica e matemática
-		\item Transformers e posicionais
-		\item Aplicações: Séries Temporais, Language Models, ViT, GAT
-		\item Treinamento, variantes e hiperparâmetros
-		\item Tamanho ideal (scaling), Mixture of Experts
-		\item Pruning e Distillation
-		\item Limitações, diagnóstico e conclusões
-	\end{itemize}
-\end{frame}
-
-%===========================
-% MOTIVAÇÃO & HISTÓRICO
-%===========================
-\begin{chapter}[assets/background_negative]{sintefdarkgreen}{Motivação \& Histórico}\end{chapter}
-
-\section{Motivação}
-\begin{frame}{Por que Atenção?}
-	\begin{itemize}[<+->]
-		\item Capturar dependências longas e filtrar informação relevante
-		\item RNNs sofrem com gradientes e paralelização limitada
-		\item Pesos de atenção ajudam na interpretabilidade
-		\item Melhor relação capacidade/compute em diversas tarefas
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Histórico em 3 passos}
-	\begin{itemize}[<+->]
-		\item \textbf{Additive Attention} (Bahdanau) para NMT
-		\item \textbf{Dot-Product Attention} (Luong) — caminho para escalabilidade
-		\item \textbf{Transformers} (Vaswani et al., 2017): “Attention is All You Need”
-	\end{itemize}
-\end{frame}
 
 %===========================
 % FUNDAMENTOS
