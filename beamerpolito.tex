@@ -356,12 +356,62 @@ Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alin
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Interpretação Geométrica da Atenção}
-	\begin{itemize}
-		\item $Q,K,V$ são projeções lineares do latente
-		\item Similaridade (coseno/dot) guia uma \emph{combinação convexa} de $V$
-		\item Multi-head $\Rightarrow$ múltiplas métricas/projeções simultâneas
-	\end{itemize}
+% ---------- Frame 1: Projeções + Compatibilidade + Pesos ----------
+\begin{frame}{Atenção: projeções e compatibilidade}
+\begin{columns}[t]
+  \column{0.55\textwidth}
+  \begin{itemize}
+    \item \textbf{Projeções lineares}: $Q=XW_Q,\;K=XW_K,\;V=XW_V$.
+    \item \textbf{Compatibilidade}: $e_i=\frac{\langle q,k_i\rangle}{\sqrt{d}}$ 
+          (ou cosseno se normalizar).
+    \item \textbf{Pesos}: $\alpha_i=\mathrm{softmax}(e_i)\Rightarrow \alpha_i\!\ge\!0,\ \sum_i \alpha_i=1$.
+  \end{itemize}
+  \column{0.45\textwidth}
+  \begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{assets/scalar-softmax.png}
+	\caption{Pesos $\alpha_i$ (softmax do dot-product)}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+% ---------- Frame 2: Contexto como combinação convexa ----------
+\begin{frame}{Interpretação Geométrica: contexto = barycenter}
+\begin{itemize}
+  \item \textbf{Contexto}: $c=\sum_i \alpha_i v_i \in \mathrm{conv}\{v_i\}$ 
+        $\Rightarrow$ combinação \emph{convexa} dos values.
+  \item \textbf{Geometria}: níveis de igual peso são hiperplanos ortogonais a $q$; 
+        pesos crescem exponencialmente com o alinhamento entre $q$ e $k_i$.
+\end{itemize}
+\begin{figure}
+	\centering
+  \includegraphics[height=0.7\textheight,keepaspectratio]{assets/rep_2D_cnv.png}
+\end{figure}
+\end{frame}
+
+% ---------- Frame 3: Multi-head como múltiplas métricas ----------
+\begin{frame}{Multi-head: múltiplas projeções/métricas}
+\begin{itemize}
+  \item Cada head aplica $(W_Q^{(h)},W_K^{(h)},W_V^{(h)})$ e induz 
+        uma métrica interna distinta: 
+        $\langle x,y\rangle_h = x^\top W_Q^{(h)} {W_K^{(h)}}^\top y$.
+  \item Heads diferentes \textrightarrow\ diferentes pesos $\alpha^{(h)}$ e 
+        contextos $c^{(h)}$; a saída concatena/combina esses subespaços.
+\end{itemize}
+\begin{columns}[c]
+  \column{0.5\textwidth}
+  \begin{figure}
+	\centering
+	\includegraphics[width=\linewidth,height=0.55\textheight]{assets/att_head1.png}
+	\caption{Head 1}
+  \end{figure}
+  \column{0.5\textwidth}
+  \begin{figure}
+	\centering
+	\includegraphics[width=\linewidth,height=0.55\textheight]{assets/att_head2.png}
+	\caption{Head 2}
+  \end{figure}
+\end{columns}
 \end{frame}
 
 \begin{frame}{Interpretação Matemática: Self-Attention}
