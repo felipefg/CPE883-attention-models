@@ -117,6 +117,39 @@
 	\end{itemize}
 \end{frame}
 
+
+\begin{frame}{Atenção aditiva (Bahdanau \cite{bahdanau2014neural})}
+	\begin{columns}[t]
+		\column{0.5\textwidth}
+		\vspace{-8mm}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[height=0.55\textheight]{assets/Bahdanau-Decoder.png}
+		\end{figure}
+		\vspace{-3mm}
+		\small
+		\begin{itemize}
+			\item Cada etapa do decoder recebe um vetor de contexto $c_i$.
+			\item O vetor de contexto é uma combinação ponderada dos estados do encoder.
+		\end{itemize}
+
+		\column{0.5\textwidth}
+		\vspace{-8mm}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[height=0.55\textheight]{assets/Bahdanau-Alignment.png}
+		\end{figure}
+		\vspace{-3mm}
+		\small
+		\begin{itemize}
+			\item Escore de alinhamento avalia o quanto a palavra $x_j$ é relevante para prever $y_i$.
+			\item Calculado por uma rede neural feedforward.
+		\end{itemize}
+
+	\end{columns}
+
+\end{frame}
+
 % 3) Solução 1: Atenção sobre o encoder (Bahdanau/Luong)
 \begin{frame}{Atenção aditiva \cite{bahdanau2014neural}}
 \[
