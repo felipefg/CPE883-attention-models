@@ -25,7 +25,7 @@
 % --- Metadados ---
 \title{Attention Models: da motivação às variantes modernas}
 \subtitle{Intuição geométrica, formulação matemática e aplicações}
-\author{Seu Nome}
+\author{Rodrigo Petrus Domingues, Felipe Grael e Vivian}
 \date{\today}
 
 \begin{document}
@@ -36,11 +36,10 @@
 % Evolução: LSTM → Atenção → Transformer (apenas frames)
 % ============================
 
-\section{Evolução: LSTM \texorpdfstring{$\rightarrow$}{->} Atenção \texorpdfstring{$\rightarrow$}{->} Transformer}
+\section{Motivação e Histórico}
 
 
 \begin{frame}{Redes Neurais Recorrentes}
-	\framesubtitle{Motivação}
 
 	\begin{figure}[h]
 		\centering
@@ -57,43 +56,45 @@
 \end{frame}
 
 \begin{frame}{Tipos de camadas RNN}
-	\framesubtitle{Motivação}
 	\begin{columns}[t]
 		\column{0.5\textwidth}
+		\vspace{-5mm}
 		\begin{center}
 			\textbf{LSTM}
 		\end{center}
-
+		\vspace{-5mm}
 		\begin{figure}[h]
 			\centering
-			\includegraphics[width=0.33\textwidth]{assets/colah-LSTM-layer.png}
+			\includegraphics[width=0.5\textwidth]{assets/LSTM_Gates.png}
 		\end{figure}
-
-		\tiny\[
-			\begin{aligned}
-				f_t         & = \sigma(W_f \cdot \left[h_{t-1}, x_t \right] + b_f) \\
-				i_t         & = \sigma(W_i \cdot \left[h_{t-1}, x_t \right] + b_i) \\
-				\tilde{C}_t & = \tanh(W_c \cdot \left[h_{t-1}, x_t \right] + b_c)  \\
-				C_t         & = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t          \\
-				o_t         & = \sigma(W_o \cdot \left[h_{t-1}, x_t \right] + b_o) \\
-				h_t         & = o_t \odot \tanh(c_t)
-			\end{aligned}
+		\vspace{-2mm}
+		\tiny
+		\[
+		\begin{alignedat}{2}
+			f_t & = \sigma(W_f [h_{t-1}, x_t] + b_f), \quad & 
+			i_t & = \sigma(W_i [h_{t-1}, x_t] + b_i), \\
+			\tilde{C}_t & = \tanh(W_c [h_{t-1}, x_t] + b_c), \quad &
+			C_t & = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t, \\
+			o_t & = \sigma(W_o [h_{t-1}, x_t] + b_o), \quad &
+			h_t & = o_t \odot \tanh(C_t)
+		\end{alignedat}
 		\]
 		\column{0.5\textwidth}
+		\vspace{-5mm}
 		\begin{center}
 			\textbf{GRU}
 		\end{center}
-
+		\vspace{-5mm}
 		\begin{figure}[h]
 			\centering
-			\includegraphics[width=0.33\textwidth]{assets/colah-GRU-layer.png}
+			\includegraphics[width=0.5\textwidth]{assets/colah-GRU-layer.png}
 		\end{figure}
-
+		\vspace{-2mm}
 		\tiny\[
 			\begin{aligned}
-				z_t         & = \sigma(W_z \cdot \left[h_{t-1}, x_t \right])        \\
-				r_t         & = \sigma(W_r \cdot \left[h_{t-1}, x_t \right])        \\
-				\tilde{h}_t & = \tanh(W \cdot \left[r_t \odot h_{t-1}, x_t \right]) \\
+				z_t         & = \sigma(W_z \cdot [h_{t-1}, x_t ])               \\
+				r_t         & = \sigma(W_r \cdot [h_{t-1}, x_t ])               \\
+				\tilde{h}_t & = \tanh(W \cdot [r_t \odot h_{t-1}, x_t ])        \\
 				h_t         & = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
 			\end{aligned}
 		\]
@@ -101,55 +102,146 @@
 	\end{columns}
 \end{frame}
 
-% 1) LSTM baseline: encoder-decoder e gargalo
-\begin{frame}{LSTM como baseline para NMT}
+\begin{frame}{Arquitetura Seq2Seq para Tradução}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{assets/Seq2Seq_NMT.png}
+	\end{figure}
 	\begin{itemize}
-		\item Encoder LSTM lê $(x_1,\dots,x_n)$ e produz estados $h_t$; o contexto é o último estado $c=h_n$.
-		\item Decoder LSTM gera $(y_1,\dots,y_m)$ condicionado a $c$.
-	\end{itemize}
-	\[
-		\begin{aligned}
-			i_t & = \sigma(W_i x_t + U_i h_{t-1} + b_i),\quad
-			f_t = \sigma(W_f x_t + U_f h_{t-1} + b_f),              \\
-			o_t & = \sigma(W_o x_t + U_o h_{t-1} + b_o),\quad
-			\tilde{c}_t = \tanh(W_c x_t + U_c h_{t-1} + b_c),       \\
-			c_t & = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t,\quad
-			h_t = o_t \odot \tanh(c_t).
-		\end{aligned}
-	\]
-	\begin{itemize}
-		\item \textbf{Gargalo}: toda a informação bla comprimida em $c=h_n$.
+		\item \textbf{Gargalo}: toda a informação comprimida em $c=h_n$.
+		\begin{itemize}
+			\item Processamento \textbf{sequencial} $\Rightarrow$ baixa paralelização.
+			\item \textbf{Dependências longas} ainda são difíceis (mesmo com portas).
+			\item \textbf{Gargalo do contexto} (vetor único) degrada qualidade em frases longas.
+		\end{itemize}
 	\end{itemize}
 \end{frame}
 
-% 2) Limitações do LSTM
-\begin{frame}{Limitações do LSTM (motivação para atenção)}
-	\begin{itemize}
-		\item Processamento \textbf{sequencial} $\Rightarrow$ baixa paralelização.
-		\item \textbf{Dependências longas} ainda são difíceis (mesmo com portas).
-		\item \textbf{Gargalo do contexto} (vetor único) degrada qualidade em frases longas.
-	\end{itemize}
+
+\begin{frame}{Atenção aditiva (Bahdanau \cite{bahdanau2014neural})}
+	\begin{columns}[t]
+		\column{0.5\textwidth}
+		\vspace{-8mm}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[height=0.55\textheight]{assets/Bahdanau-Decoder.png}
+		\end{figure}
+		\vspace{-3mm}
+		\small
+		\begin{itemize}
+			\item Cada etapa do decoder recebe um vetor de contexto $c_i$.
+			\item O vetor de contexto é uma combinação ponderada dos estados do encoder.
+		\end{itemize}
+
+		\column{0.5\textwidth}
+		\vspace{-8mm}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[height=0.55\textheight]{assets/Bahdanau-Alignment.png}
+		\end{figure}
+		\vspace{-3mm}
+		\small
+		\begin{itemize}
+			\item Escore de alinhamento avalia o quanto a palavra $x_j$ é relevante para prever $y_i$.
+			\item Calculado por uma rede neural feedforward.
+		\end{itemize}
+
+	\end{columns}
+
 \end{frame}
 
 % 3) Solução 1: Atenção sobre o encoder (Bahdanau/Luong)
-\begin{frame}{Atenção no encoder--decoder (Bahdanau/Luong)}
-	\textbf{Atenção aditiva (Bahdanau):}
-	\[
-		e_{ij} = v^\top \tanh\!\big(W_1 h_i + W_2 s_j\big),\quad
-		\alpha_{ij} = \mathrm{softmax}_i(e_{ij}),\quad
-		c_j = \sum_i \alpha_{ij} h_i .
-	\]
-	\textbf{Atenção multiplicativa (Luong):}
-	\[
-		e_{ij} = s_j^\top W h_i \quad \text{(general)}, \qquad
-		e_{ij} = s_j^\top h_i \quad \text{(dot)}.
-	\]
-	\begin{itemize}
-		\item Para gerar $y_j$, o decoder combina todos os $h_i$ via pesos $\alpha_{ij}$ (alinhamento dinâmico).
-		\item \textbf{Resolve o gargalo}, melhora frases longas e dá interpretabilidade (mapas de atenção).
-		\item Ainda há recursão no decoder (processo sequencial).
-	\end{itemize}
+\begin{frame}{Atenção aditiva \cite{bahdanau2014neural}}
+\[
+e_{ij} = a(s_{i-1}, h_j), \quad
+\alpha_{ij} = \frac{\exp(e_{ij})}{\sum_{k=1}^{T_x} \exp(e_{ik})}, \quad
+c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
+\]
+
+\begin{itemize}
+  \item $h_j$: estado oculto do encoder na posição $j$ (palavra $x_j$).
+  \item $s_{i-1}$: estado do decoder no passo anterior ($y_{i-1}$).
+  \item $e_{ij}$: escore de alinhamento entre $h_j$ e $s_{i-1}$ (via rede feedforward).
+  \item $\alpha_{ij}$: pesos normalizados (softmax) $\to$ distribuem a atenção sobre os $h_j$.
+  \item $c_i$: vetor de contexto dinâmico usado para prever $y_i$.
+\end{itemize}
+
+\textbf{Intuição:} O decoder calcula, em cada passo, um mapa de atenção sobre os estados do encoder, decidindo onde focar.
 \end{frame}
+
+\begin{frame}{Integração com encoder bidirecional e decoder}
+\begin{itemize}
+  \item O \textbf{encoder} é uma RNN bidirecional:
+  \[
+  h_j = [\overrightarrow{h_j}; \overleftarrow{h_j}]
+  \]
+  Cada $h_j$ contém contexto passado e futuro da palavra $x_j$.
+  
+  \item O vetor de contexto $c_i$ é construído a partir desses estados bidirecionais.
+  
+  \item O \textbf{decoder} (RNN unidirecional) atualiza seu estado com:
+  \[
+  s_i = f(s_{i-1}, y_{i-1}, c_i)
+  \]
+  - Usa o estado anterior $s_{i-1}$
+  - O símbolo anterior $y_{i-1}$
+  - O contexto dinâmico $c_i$
+  
+  \item Assim, a cada passo, o decoder combina memória interna + contexto dinâmico para prever $y_i$.
+\end{itemize}
+
+\textbf{Resultado:} 
+Resolve o gargalo do vetor fixo único ($h_n$) e permite traduções mais fiéis em frases longas.
+\end{frame}
+
+
+\begin{frame}{Atenção multiplicativa \cite{luong2015effective}}
+\textbf{Três variantes de scoring:}
+\[
+\begin{aligned}
+e_{ij} &= v^\top \tanh(W [s_j; h_i]) && \text{(concat, similar ao Bahdanau)} \\
+e_{ij} &= s_j^\top W h_i && \text{(general)} \\
+e_{ij} &= s_j^\top h_i && \text{(dot)}
+\end{aligned}
+\]
+
+\begin{itemize}
+  \item $s_j$: query → estado oculto do decoder.
+  \item $h_i$: key/value → estado do encoder.
+  \item \textbf{Concat:} aproxima-se da atenção aditiva de Bahdanau.
+  \item \textbf{General:} bilinear, mais expressivo (aprende $W$).
+  \item \textbf{Dot:} mais simples e rápido (nenhum parâmetro extra).
+\end{itemize}
+
+\textbf{Nota:} Podemos reinterpretar em termos modernos como $Q=s_j$, $K=h_i$, $V=h_i$.
+\end{frame}
+
+\begin{frame}{Global vs Local Attention \cite{luong2015effective}}
+\begin{columns}[c]
+  \column{0.35\textwidth}
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{assets/global attention.png}
+      \caption*{Global Attention}
+    \end{figure}
+  \column{0.35\textwidth}
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{assets/local attention.png}
+      \caption*{Local Attention}
+    \end{figure}
+\end{columns}
+
+\begin{itemize}
+  \item \textbf{Global:} o decoder olha para \emph{todos} os estados do encoder em cada passo $j$.  
+  \item \textbf{Local:} o decoder olha apenas para uma \emph{janela limitada} de estados do encoder ao redor de uma posição prevista $p_t$.  
+  \item O cálculo do contexto $c_j$ é o mesmo, mas a diferença está no \textbf{escopo de atenção}.  
+\end{itemize}
+
+\textbf{Resumo:}  
+Global é mais expressivo mas caro; Local é mais eficiente e pode capturar alinhamentos monotônicos mais naturalmente.
+\end{frame}
+
 
 % 4) Solução 2: Self-Attention (intra-sequência)
 \begin{frame}{Self-Attention: dependências em paralelo}
@@ -169,8 +261,17 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}{Arquitetura pré-transformer}
+\begin{figure}
+  \centering
+  \includegraphics[height=0.75\textheight]{assets/The-framework-of-additive-attention-mechanism-in-decoder.png}
+  \caption{Exemplo de arquitetura pré-transformer (aditiva) \cite{gu2022pointer}}
+\end{figure}
+\end{frame}
+
+\section{Transformers}
 % 5) Transformer: tirar LSTM, adicionar posição + FFN e empilhar blocos
-\begin{frame}{Attention Is All You Need: nascendo o Transformer}
+\begin{frame}{Attention Is All You Need \cite{vaswani2017attention}: nascendo o Transformer}
 	\begin{itemize}
 		\item \textbf{Remove} completamente a recorrência (sem LSTM).
 		\item \textbf{Positional encodings} preservam ordem:
@@ -178,6 +279,16 @@
 			      PE_{(pos,2i)}=\sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right),\quad
 			      PE_{(pos,2i+1)}=\cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right).
 		      \]
+	\end{itemize}
+	\begin{figure}
+	\centering
+	\includegraphics[height=0.55\textheight,width=0.7\linewidth]{assets/positional-encoding.png}
+	\caption{Exemplo de codificação posicional senoidal \cite{vaswani2017attention}}
+	\end{figure}	
+\end{frame}
+
+\begin{frame}{Bloco Transformer e arquitetura}
+	\begin{itemize}
 		\item Cada \textbf{bloco Transformer} (pré-norm, forma comum):
 		      \[
 			      \begin{aligned}
@@ -186,20 +297,81 @@
 			      \end{aligned}
 		      \]
 		\item Empilha-se vários blocos de atenção+FFN $\Rightarrow$ \textbf{arquitetura Transformer}.
+	
+		\item \textbf{Máscara causal} (para LMs) impede olhar o futuro:
+		\[
+			\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}+M\right),
+			\quad
+			M_{ij}=\begin{cases}
+				0,       & j\le i \\
+				-\infty, & j>i
+			\end{cases}
+		\]
 	\end{itemize}
 \end{frame}
 
+\begin{frame}{Arquiteturas Transformer e Aplicações}
+\begin{columns}[t]
+  % Coluna 1
+  \column{0.33\textwidth}
+  \textbf{Encoder--Decoder} \\
+  (Transformer original, 2017)
+  \begin{itemize}
+    \item Tradução automática
+    \item Sumarização
+    \item Diálogo
+    \item Captioning
+  \end{itemize}
+
+  % Coluna 2
+  \column{0.33\textwidth}
+  \textbf{Encoder-only} \\
+  (BERT, RoBERTa, DistilBERT)
+  \begin{itemize}
+    \item Classificação de texto
+    \item NER (entidades)
+    \item QA (extração de trechos)
+    \item Análise semântica
+  \end{itemize}
+
+  % Coluna 3
+  \column{0.33\textwidth}
+  \textbf{Decoder-only} \\
+  (GPT, LLaMA, etc.)
+  \begin{itemize}
+    \item Modelos de linguagem
+    \item Geração de texto
+    \item Completamento de prompts
+    \item Story generation
+  \end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Arquiteturas Transformer: encoder e decoder \cite{vaswani2017attention}}
+\begin{columns}[t]	
+	\column{0.33\textwidth}
+	\begin{figure}
+		\centering
+		\includegraphics[height=0.75\textheight]{assets/Transformer.png}
+		\caption{Transformer Encoder e Decoder}
+	\end{figure}
+	\column{0.33\textwidth}
+	\begin{figure}
+		\centering
+		\includegraphics[height=0.75\textheight]{assets/transformer-multi-head-attention.png}
+		\caption{Multi-Head Attention}
+	\end{figure}
+	\column{0.33\textwidth}
+	\begin{figure}
+		\centering
+		\includegraphics[height=0.75\textheight]{assets/transformer-scaled-dot-attention.png}
+		\caption{Multi-Head Attention}
+	\end{figure}
+\end{columns}
+\end{frame}
 % 6) Máscara causal e síntese da evolução
-\begin{frame}{Máscara causal e síntese da evolução}
-	\textbf{Máscara causal} (para LMs) impede olhar o futuro:
-	\[
-		\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}+M\right),
-		\quad
-		M_{ij}=\begin{cases}
-			0,       & j\le i \\
-			-\infty, & j>i
-		\end{cases}
-	\]
+\begin{frame}{Resumo da evolução dos modelos}
+
 	\textbf{Linha do tempo (síntese):}
 	\begin{itemize}
 		\item LSTM encoder--decoder: contexto único $c=h_n$ (gargalo).
@@ -209,92 +381,71 @@
 	\end{itemize}
 \end{frame}
 
-%===========================
-% ROADMAP
-%===========================
-\section{Roteiro}
-\begin{frame}{Roteiro da Apresentação}
-	\begin{itemize}[<+->]
-		\item Motivação e histórico
-		\item Modelos de sequência (RNN/LSTM) + Attention
-		\item Embeddings, interpretação geométrica e matemática
-		\item Transformers e posicionais
-		\item Aplicações: Séries Temporais, Language Models, ViT, GAT
-		\item Treinamento, variantes e hiperparâmetros
-		\item Tamanho ideal (scaling), Mixture of Experts
-		\item Pruning e Distillation
-		\item Limitações, diagnóstico e conclusões
-	\end{itemize}
-\end{frame}
-
-%===========================
-% MOTIVAÇÃO & HISTÓRICO
-%===========================
-\begin{chapter}[assets/background_negative]{sintefdarkgreen}{Motivação \& Histórico}\end{chapter}
-
-\section{Motivação}
-\begin{frame}{Por que Atenção?}
-	\begin{itemize}[<+->]
-		\item Capturar dependências longas e filtrar informação relevante
-		\item RNNs sofrem com gradientes e paralelização limitada
-		\item Pesos de atenção ajudam na interpretabilidade
-		\item Melhor relação capacidade/compute em diversas tarefas
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Histórico em 3 passos}
-	\begin{itemize}[<+->]
-		\item \textbf{Additive Attention} (Bahdanau) para NMT
-		\item \textbf{Dot-Product Attention} (Luong) — caminho para escalabilidade
-		\item \textbf{Transformers} (Vaswani et al., 2017): “Attention is All You Need”
-	\end{itemize}
-\end{frame}
-
-%===========================
-% FUNDAMENTOS
-%===========================
-\begin{chapter}[assets/background_negative]{sintefgreen}{Fundamentos}\end{chapter}
-
-\section{Modelos de Sequência}
-\begin{frame}{RNN/GRU/LSTM — limites práticos}
-	\begin{itemize}[<+->]
-		\item Cálculo sequencial $\Rightarrow$ baixa paralelização
-		\item Dependências longas: vanish/explode (mitigado, não resolvido)
-		\item Memória finita e custo de treino elevado para contextos longos
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{LSTM + Attention (Encoder--Decoder)}
-	\framesubtitle{Atenção aditiva (Bahdanau)}
-	\begin{block}{Equações}
-		\small
-		\[
-			e_{ij} = v^\top \tanh\!\big(W_1\,h_i + W_2\,s_j\big), \quad
-			\alpha_{ij} = \mathrm{softmax}_i(e_{ij}), \quad
-			c_j = \sum_i \alpha_{ij} h_i
-		\]
-	\end{block}
-	\begin{itemize}[<+->]
-		\item \textbf{Alinhamento} dinâmico entre estados do encoder e passos do decoder
-		\item Reduz gargalos de um único vetor de contexto
-	\end{itemize}
-\end{frame}
-
 \section{Embeddings \& Interpretações}
 \begin{frame}{Word/Subword Embeddings}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Estáticos (Word2Vec, GloVe) vs. Contextuais (ELMo, BERT)
 		\item Subword (BPE/Unigram) para robustez morfológica
 		\item Análogos em outras modalidades: patches (ViT), time2vec (TS), node2vec (grafos)
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Interpretação Geométrica da Atenção}
-	\begin{itemize}[<+->]
-		\item $Q,K,V$ são projeções lineares do latente
-		\item Similaridade (coseno/dot) guia uma \emph{combinação convexa} de $V$
-		\item Multi-head $\Rightarrow$ múltiplas métricas/projeções simultâneas
-	\end{itemize}
+% ---------- Frame 1: Projeções + Compatibilidade + Pesos ----------
+\begin{frame}{Atenção: projeções e compatibilidade}
+\begin{columns}[t]
+  \column{0.55\textwidth}
+  \begin{itemize}
+    \item \textbf{Projeções lineares}: $Q=XW_Q,\;K=XW_K,\;V=XW_V$.
+    \item \textbf{Compatibilidade}: $e_i=\frac{\langle q,k_i\rangle}{\sqrt{d}}$ 
+          (ou cosseno se normalizar).
+    \item \textbf{Pesos}: $\alpha_i=\mathrm{softmax}(e_i)\Rightarrow \alpha_i\!\ge\!0,\ \sum_i \alpha_i=1$.
+  \end{itemize}
+  \column{0.45\textwidth}
+  \begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{assets/scalar-softmax.png}
+	\caption{Pesos $\alpha_i$ (softmax do dot-product)}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+% ---------- Frame 2: Contexto como combinação convexa ----------
+\begin{frame}{Interpretação Geométrica: contexto = barycenter}
+\begin{itemize}
+  \item \textbf{Contexto}: $c=\sum_i \alpha_i v_i \in \mathrm{conv}\{v_i\}$ 
+        $\Rightarrow$ combinação \emph{convexa} dos values.
+  \item \textbf{Geometria}: níveis de igual peso são hiperplanos ortogonais a $q$; 
+        pesos crescem exponencialmente com o alinhamento entre $q$ e $k_i$.
+\end{itemize}
+\begin{figure}
+	\centering
+  \includegraphics[height=0.7\textheight,keepaspectratio]{assets/rep_2D_cnv.png}
+\end{figure}
+\end{frame}
+
+% ---------- Frame 3: Multi-head como múltiplas métricas ----------
+\begin{frame}{Multi-head: múltiplas projeções/métricas}
+\begin{itemize}
+  \item Cada head aplica $(W_Q^{(h)},W_K^{(h)},W_V^{(h)})$ e induz 
+        uma métrica interna distinta: 
+        $\langle x,y\rangle_h = x^\top W_Q^{(h)} {W_K^{(h)}}^\top y$.
+  \item Heads diferentes \textrightarrow\ diferentes pesos $\alpha^{(h)}$ e 
+        contextos $c^{(h)}$; a saída concatena/combina esses subespaços.
+\end{itemize}
+\begin{columns}[c]
+  \column{0.5\textwidth}
+  \begin{figure}
+	\centering
+	\includegraphics[width=\linewidth,height=0.55\textheight]{assets/att_head1.png}
+	\caption{Head 1}
+  \end{figure}
+  \column{0.5\textwidth}
+  \begin{figure}
+	\centering
+	\includegraphics[width=\linewidth,height=0.55\textheight]{assets/att_head2.png}
+	\caption{Head 2}
+  \end{figure}
+\end{columns}
 \end{frame}
 
 \begin{frame}{Interpretação Matemática: Self-Attention}
@@ -303,50 +454,100 @@
 			\mathrm{Att}(Q,K,V) \;=\; \mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)\,V
 		\]
 	\end{block}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Máscara causal/atencional conforme a tarefa
 		\item Complexidade $\mathcal{O}(n^2)$ em tempo/memória
 		\item Gradientes e saturação da softmax
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Positional Encodings}
-	\begin{itemize}[<+->]
-		\item Absolutos senoidais vs. aprendidos
-		\item Relativos e RoPE (rotary): melhor generalização/composição
-		\item Impacto em extrapolação e contextos longos
-	\end{itemize}
+% ---------- Frame 1 ----------
+\begin{frame}{Positional Encodings — Absolutos}
+\begin{itemize}
+  \item \textbf{Senoidais \cite{vaswani2017attention}:}
+  \[
+  PE(pos,2i)=\sin\!\Big(\tfrac{pos}{10000^{2i/d}}\Big),\quad
+  PE(pos,2i{+}1)=\cos\!\Big(\tfrac{pos}{10000^{2i/d}}\Big)
+  \]
+  \begin{itemize}
+    \item Frequências diferentes em cada dimensão.
+    \item Permitem extrapolação por periodicidade.
+    \item Risco: aliasing (padrões que se repetem em posições distantes).
+  \end{itemize}
+
+  \item \textbf{Aprendidos:}
+  \[
+  z_{pos}=x_{pos}+P_{pos},\;\; P\in\mathbb{R}^{L_{\max}\times d}
+  \]
+  \begin{itemize}
+    \item Mais flexíveis e adaptados à tarefa.
+    \item \textbf{Limite}: não extrapolam para posições > $L_{\max}$.
+  \end{itemize}
+\end{itemize}
 \end{frame}
 
-%===========================
-% TRANSFORMERS
-%===========================
-\begin{chapter}[assets/background_negative]{sinteflightgreen}{Transformers}\end{chapter}
+% ---------- Frame 2 ----------
+\begin{frame}{Positional Encodings — Relativos e Bias}
+\begin{itemize}
+  \item \textbf{Shaw et al. (2018):}
+  \[
+  e_{ij}=q_i^\top(k_j + r_{i-j})
+  \]
+  ou com bias $b_{i-j}$. Codifica \textbf{distâncias} em vez de posições absolutas.
 
-\section{Arquiteturas \& Variantes}
-\begin{frame}{Arquiteturas Transformer}
-	\begin{itemize}[<+->]
-		\item \textbf{Encoder--Decoder}, \textbf{Encoder-only}, \textbf{Decoder-only}
-		\item Bloco: MHSA + FFN, \textit{residual} + \textit{layer norm}
-		\item Pré-norm vs. pós-norm (estabilidade de treino)
-	\end{itemize}
+  \item \textbf{T5 (Raffel et al., 2020):}
+  \[
+  e_{ij}=q_i^\top k_j + B_{\text{bucket}(i-j)}
+  \]
+  \begin{itemize}
+    \item “Baldes” de distâncias (log-escalados).
+    \item Barato, simples, bom para extrapolação moderada.
+  \end{itemize}
+
+  \item \textbf{ALiBi (Press et al., 2022):}
+  \[
+  e_{ij} \;+\; m_h\,(i-j)
+  \]
+  \begin{itemize}
+    \item Inclinação linear por head.
+    \item Suporta janelas muito maiores sem retraining.
+    \item Praticamente custo zero.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+% ---------- Frame 3 ----------
+\begin{frame}{Positional Encodings — RoPE e Impacto Prático}
+\begin{itemize}
+  \item \textbf{RoPE (Su et al., 2021):} aplica rotação dependente da posição:
+  \[
+  \tilde{x}_{2i},\tilde{x}_{2i+1} =
+  \begin{cases}
+  x_{2i}\cos\theta - x_{2i+1}\sin\theta \\
+  x_{2i}\sin\theta + x_{2i+1}\cos\theta
+  \end{cases},\quad
+  \theta=\tfrac{pos}{10000^{2i/d}}
+  \]
+  \begin{itemize}
+    \item Produto $q^\top k$ passa a depender de $(pos_q - pos_k)$.
+    \item $\Rightarrow$ natural para codificar deslocamentos/ordem relativa.
+  \end{itemize}
+
+  \item \textbf{Impacto prático:}
+  \begin{itemize}
+    \item Absolutos aprendidos: limitados ao $L_{\max}$.
+    \item Senoidais: extrapolam mas sofrem com aliasing.
+    \item Relativos (T5, ALiBi, RoPE): melhor estabilidade para contextos longos.
+  \end{itemize}
+
+  \item \textbf{Hoje}: ALiBi e RoPE são o padrão em LLMs de longo contexto.
+\end{itemize}
 \end{frame}
 
-\begin{frame}{Atenções Eficientes}
-	\begin{itemize}[<+->]
-		\item \textbf{Esparsidade}: Longformer/BigBird (padrões locais+globais)
-		\item \textbf{Aproximação}: Linformer, Nyströmformer
-		\item \textbf{Kernels}: Performer (favor+), FlashAttention (IO-aware)
-		\item \textbf{Outros}: Reformer (LSH)
-	\end{itemize}
-	\begin{block}{Trade-off}
-		Complexidade $\mathcal{O}(n^2)$ $\rightarrow$ $\tilde{\mathcal{O}}(n)$ com perda controlada de exatidão e/ou restrições de padrão.
-	\end{block}
-\end{frame}
+
 
 \section{Treino \& Hiperparâmetros}
 \begin{frame}{Práticas de Treino}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item AdamW, warmup + decaimento; label smoothing quando aplicável
 		\item Regularização: dropout, stochastic depth, weight decay
 		\item AMP/mixed precision, grad clipping, checkpointing
@@ -355,7 +556,7 @@
 \end{frame}
 
 \begin{frame}{Hiperparâmetros Essenciais}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Profundidade, $d_{\text{model}}$, \#heads, $d_{ff}$, dropout
 		\item Comprimento de contexto, batch size, \textit{LR schedule}
 		\item Específicos: tokenização (LM), \textit{patch size} (ViT), janela/patch (TS)
@@ -363,34 +564,99 @@
 \end{frame}
 
 \begin{frame}{Qual tamanho ideal? (Scaling)}
-	\begin{itemize}[<+->]
-		\item Leis de escala vs. limite de dados/compute
-		\item Tokens vs. parâmetros; saturação com contexto
-		\item Regra prática: dimensione para o dataset e o \textit{budget} de inferência
-	\end{itemize}
+\begin{itemize}
+  \item \textbf{Leis de escala \cite{kaplan2020scaling}:} 
+        desempenho cresce com $\uparrow$ dados, parâmetros e compute, até saturar.
+        
+  \item \textbf{Trade-offs:} 
+        muitos parâmetros + poucos dados $\to$ overfitting; 
+        muitos dados + poucos parâmetros $\to$ subutilização.
+
+  \item \textbf{Tokens vs. parâmetros:} 
+        ideal quando \#tokens $\approx$ múltiplos de \#parâmetros 
+        \cite{hoffmann2022training}.
+
+  \item \textbf{Contexto:} 
+        janelas maiores ajudam, mas ganhos saturam.
+
+  \item \textbf{Regra prática:} 
+        dimensione conforme dataset + compute + budget de inferência.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Resumo:} não há tamanho ótimo universal — depende do equilíbrio entre
+dados, parâmetros e recursos disponíveis.
 \end{frame}
+
+
 
 %===========================
 % APLICAÇÕES
 %===========================
-\begin{chapter}[assets/background_negative]{sintefyellow}{Aplicações}\end{chapter}
 
 \section{Séries Temporais}
+% ------ Frame 1: Explicação ------
 \begin{frame}{Atenção em Séries Temporais}
-	\begin{itemize}[<+->]
-		\item Codificação temporal: absolutos/relativos, time2vec, calendários/sazonalidade
-		\item Exógenas e \textit{cross-attention}; \textit{patching} para contextos longos
-		\item Tarefas: previsão, imputação, detecção de anomalias
-	\end{itemize}
+\begin{itemize}
+  \item \textbf{Codificação temporal:} absolutos/relativos; \textit{Time2Vec}; embeddings de calendário (hora/dia/sazonalidade).
+  \item \textbf{Exógenas + cross-attention:} integrar variáveis externas (clima, preços, feriados) à série-alvo.
+  \item \textbf{Contextos longos:} \textit{patching} (janelas), sparsity e hashing; ganhos de janelas muito grandes tendem a saturar.
+  \item \textbf{Por que atenção:} foca nos trechos relevantes do histórico e alinha padrões não estacionários/irregulares.
+  \item \textbf{Tarefas:} previsão (forecasting), imputação (faltantes) e detecção de anomalias.
+\end{itemize}
+\end{frame}
+
+% ------ Frame 2: Referências (GitHub) ------
+\begin{frame}{Modelos recentes (com código)}
+\footnotesize
+\begin{itemize}
+  \item \href{https://github.com/zhouhaoyi/Informer2020}{Informer (AAAI'21)} — atenção esparsa p/ sequências longas.
+  \item \href{https://github.com/thuml/Autoformer}{Autoformer (NeurIPS'21)} — auto-correlação + decomposição.
+  \item \href{https://github.com/yuqinie98/PatchTST}{PatchTST (ICLR'23)} — \textit{patching} / channel-independent.
+  \item \href{https://github.com/thuml/TimesNet}{TimesNet (ICLR'23)} — modelagem de variação temporal 2D.
+  \item \href{https://github.com/natmourajr/CPE883-2025-02/tree/main/models/tsdiffusion}{TSDiffusion (2023)} - difusão para séries temporais.
+\end{itemize}
 \end{frame}
 
 \section{Language Models}
+% ------ Frame 1: Explicação (LMs) ------
 \begin{frame}{Language Models (LM)}
-	\begin{itemize}[<+->]
-		\item Atenção \textbf{causal}, \textit{next-token} e \textit{masking}
-		\item Pré-treino vs. \textit{fine-tuning}; Instrução/LoRA/Adapters
-		\item Métricas: perplexidade e tarefas \textit{downstream}
-	\end{itemize}
+\begin{itemize}
+  \item \textbf{Atenção causal} (\textit{masked self-attention}): máscara triangular impede olhar o futuro.
+  \item \textbf{Objetivo autoregressivo}: minimizar $\;-\sum_{t}\log p(x_t \mid x_{<t})$ (\textit{next-token}).
+  \item \textbf{Pré-treino} (corpus amplo, tarefa genérica) \textbf{vs. fine-tuning} (tarefa/estilo): 
+        \emph{instruction tuning} (FLAN), RLHF (InstructGPT).
+  \item \textbf{PEFT} (ajuste eficiente): \emph{LoRA}, \emph{Adapters} (congelar base + poucos params).
+  \item \textbf{Métricas}: 
+        \emph{perplexity} (surpresa média por token) e \emph{downstream} (ex.: SuperGLUE, MMLU).
+\end{itemize}
+\end{frame}
+% ------ Frame 2: Referências (links) ------
+% ------ Frame 2: Implementações (GitHub) ------
+% ------ Frame: Implementações (GitHub) com anos ------
+\begin{frame}{Language Models — Implementações (GitHub)}
+\scriptsize
+\begin{columns}[t]
+  \column{0.5\textwidth}
+  \begin{itemize}
+    \item \href{https://github.com/karpathy/nanoGPT}{karpathy/nanoGPT} \textbf{(2022)} — GPT minimalista
+    \item \href{https://github.com/huggingface/transformers}{huggingface/transformers} \textbf{(2019)} — biblioteca SOTA
+    \item \href{https://github.com/EleutherAI/gpt-neox}{EleutherAI/gpt-neox} \textbf{(2022)} — treino LLMs em larga escala
+    \item \href{https://github.com/meta-llama/llama}{meta-llama/llama} \textbf{(2023)} — código/pesos Llama
+    \item \href{https://github.com/harvardnlp/annotated-transformer}{harvardnlp/annotated-transformer} \textbf{(2018)} — Transformer anotado
+  \end{itemize}
+
+  \column{0.5\textwidth}
+  \begin{itemize}
+    \item \href{https://github.com/huggingface/trl}{huggingface/trl} \textbf{(2020)} — SFT, PPO/DPO, RLHF
+    \item \href{https://github.com/deepspeedai/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat}{DeepSpeed-Chat} \textbf{(2023)} — pipeline RLHF
+    \item \href{https://github.com/OpenRLHF/OpenRLHF}{OpenRLHF/OpenRLHF} \textbf{(2023)} — RLHF escalável
+    \item \href{https://github.com/huggingface/peft}{huggingface/peft} \textbf{(2023)} — PEFT (LoRA, QLoRA, etc.)
+    \item \href{https://github.com/adapter-hub/adapters}{adapter-hub/adapters} \textbf{(2020)} — biblioteca de Adapters
+    \item \href{https://github.com/microsoft/LoRA}{microsoft/LoRA} \textbf{(2021)} — implementação LoRA oficial
+    \item \href{https://github.com/google-research/FLAN}{google-research/FLAN} \textbf{(2021)} — dados p/ instruction tuning
+  \end{itemize}
+\end{columns}
 \end{frame}
 
 %Início da Seção de Vision Transformer
@@ -427,7 +693,6 @@
     \item Comparação em benchmarks populares (ImageNet, CIFAR, Oxford Pets, Flowers, VTAB).
     \item Uso de \textbf{atenção global} traz ganhos em acurácia com menor custo de pré-treinamento que ResNets muito grandes.
 \end{itemize}
-
 \vspace{0.3cm}
 \begin{center}
     \includegraphics[width=0.8\textwidth]{assets/vit_results.png}
@@ -486,111 +751,9 @@
 			\alpha_{ij}=\mathrm{softmax}_j\!\left(\mathrm{LeakyReLU}\!\big(a^\top[Wh_i \,||\, Wh_j]\big)\right)
 		\]
 	\end{block}
-	\begin{itemize}[<+->]
+	\begin{itemize}
 		\item Multi-head; sobre-\textit{smoothing} e escalabilidade
 		\item Heterógrafos e atenção relacional
-	\end{itemize}
-\end{frame}
-
-%===========================
-% ESCALA & COMPRESSÃO
-%===========================
-\begin{chapter}[assets/background_negative]{sintefred}{Escala \& Compressão}\end{chapter}
-
-\section{MoE, Pruning, Distillation}
-\begin{frame}{Mixture of Experts (MoE)}
-	\begin{itemize}[<+->]
-		\item \textit{Gating} top-1/top-2; balanceamento de carga
-		\item Roteamento esparso: capacidade vs. ociosidade
-		\item Custos de comunicação e estabilidade no treino
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Pruning}
-	\begin{itemize}[<+->]
-		\item Não estruturado (magnitude) vs. estruturado (canal/bloco, n:m)
-		\item Iterativo vs. \textit{one-shot}; impacto em latência real
-		\item Interação com quantização e \textit{sparsity-aware kernels}
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Distillation}
-	\begin{block}{Perda típica (Hinton)}
-		\small
-		\[
-			\mathcal{L}=(1-\lambda)\,\mathrm{CE}(y,s)+\lambda\,T^2\,\mathrm{KL}\!\big(p_T \,\|\, q_T\big)
-		\]
-	\end{block}
-	\begin{itemize}[<+->]
-		\item \textit{Teacher} $\rightarrow$ \textit{student}; temperatura $T$
-		\item \textit{Intermediate layer hints}; \textit{task-specific} vs. generalista
-		\item Benefícios: latência/energia e \textit{edge deployment}
-	\end{itemize}
-\end{frame}
-
-%===========================
-% INTERPRETAÇÃO & LIMITES
-%===========================
-\begin{chapter}[assets/background_negative]{sinteflilla}{Interpretação \& Limitações}\end{chapter}
-
-\section{Diagnóstico \& Limites}
-\begin{frame}{Interpretação \& Diagnóstico}
-	\begin{itemize}[<+->]
-		\item \textit{Attention rollout/flow}; atenção $\neq$ causalidade
-		\item \textit{Probing} de camadas; ablação de cabeças
-		\item Ferramentas de \textit{explainability} por domínio
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Limitações \& Trade-offs}
-	\begin{itemize}[<+->]
-		\item Custo $\mathcal{O}(n^2)$, viés de dados, \textit{OOD} robustness
-		\item Contaminação de treino e privacidade
-		\item Energia/carbono e restrições de hardware
-	\end{itemize}
-\end{frame}
-
-%===========================
-% CONCLUSÕES
-%===========================
-\section{Conclusões}
-\begin{frame}{Conclusões}
-	\begin{itemize}[<+->]
-		\item Atenção como princípio unificador em sequência, visão e grafos
-		\item Escolha guiada por dados, métricas e orçamento (treino/inferência)
-		\item Escala e compressão (MoE/pruning/distillation) para produção
-	\end{itemize}
-\end{frame}
-
-%===========================
-% Q&A
-%===========================
-\backmatter
-\begin{frame}
-	\frametitle{Perguntas?}
-	\centering
-	Obrigado!
-\end{frame}
-
-%===========================
-% BACKUP (opc.)
-%===========================
-\section{Backup (Opcional)}
-\begin{frame}{Equações úteis (resumo)}
-	\small
-	\begin{itemize}
-		\item Scaled dot-product, aditiva (Bahdanau)
-		\item Atenção relativa e RoPE
-		\item GAT detalhado; máscaras causais
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Hiperparâmetros por tarefa (resumo)}
-	\small
-	\begin{itemize}
-		\item LM: contexto, BPE, heads/profundidade típicos
-		\item ViT: patch size, MLP ratio, augmentations
-		\item TS: janela, patching, covariáveis, perdas (MAE/MSE/Quantile)
 	\end{itemize}
 \end{frame}
 
