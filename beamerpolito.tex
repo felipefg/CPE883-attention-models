@@ -12,6 +12,9 @@
 \usetheme{sintef}
 \usefonttheme[onlymath]{serif}
 
+% --- Math Bold Font ---
+\usepackage{bm} % carregar depois de todas as fontes
+
 % --- Macros do seu template/exemplos ---
 \newcommand{\testcolor}[1]{\colorbox{#1}{\textcolor{#1}{test}}~\texttt{#1}}
 \newcommand{\hrefcol}[2]{\textcolor{cyan}{\href{#1}{#2}}}
@@ -744,18 +747,88 @@ dados, parâmetros e recursos disponíveis.
 %Fim da seção de Vision transformer
 
 \section{Graph Attention}
-\begin{frame}{Graph Attention Networks (GAT)}
-	\begin{block}{Coeficientes de Atenção (um cabeçalho)}
-		\small
-		\[
-			\alpha_{ij}=\mathrm{softmax}_j\!\left(\mathrm{LeakyReLU}\!\big(a^\top[Wh_i \,||\, Wh_j]\big)\right)
-		\]
-	\end{block}
-	\begin{itemize}
-		\item Multi-head; sobre-\textit{smoothing} e escalabilidade
-		\item Heterógrafos e atenção relacional
-	\end{itemize}
+\begin{frame}{Motivação: Graph Neural Networks}
+
+	\begin{columns}[t]
+		\column{0.5\textwidth}
+		\vspace{-5mm}
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=0.5\textwidth]{assets/Grafo.png}
+    \end{figure}
+    \small
+    \begin{itemize}
+      \item Cada nó possui um vetor de características $\bm{x_i}$ e um valor $\bm{y_i}$ a ser predito.
+    \end{itemize}
+
+		\column{0.5\textwidth}
+		\vspace{-5mm}
+    \begin{center}
+      \textbf{Rede Neural Simples}
+    \end{center}
+    \[
+      \bm{h_i} = f(\bm{x_i W^T} + b_i)
+    \]
+
+		\vspace{3mm}
+    \begin{center}
+      \textbf{Graph Neural Network}
+    \end{center}
+    \[
+      \bm{h_i} = f\left(\bm{x_i W^T} + \sum_{j \in \mathcal{N}_i} \bm{x_j W^T} \right)
+    \]
+    \small
+    \begin{itemize}
+      \item Agrega as features dos vizinhos de $i$ ($\mathcal{N}_i$)
+      \item Graph Convolutional Networks (GCNs) normalizam os pesos pelo grau dos nós.
+    \end{itemize}
+    \vfill
+  \end{columns}
+
 \end{frame}
+
+\begin{frame}{Graph Attention Network \cite{velickovic2018gats}}
+
+	\begin{columns}[t]
+		\column{0.5\textwidth}
+		\vspace{-5mm}
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=0.5\textwidth]{assets/Grafo.png}
+    \end{figure}
+    \small
+    \begin{itemize}
+      \item Pondera cada vizinho com peso de atenção $\alpha_{i,j}$.
+      \item Pode usar multi-head attention.
+    \end{itemize}
+
+		\column{0.5\textwidth}
+		\vspace{-5mm}
+    \begin{center}
+      \textbf{Graph Attention Networks (GATs)}
+    \end{center}
+    \[
+      \begin{aligned}
+        \bm{h_i} & = f\left(\bm{x_i W^T} + \sum_{j \in \mathcal{N}_i} \alpha_{i,j} \bm{x_j W^T} \right) \\
+        \alpha_{i,j} & = \mathrm{softmax}_j(e_{i,j}) \\
+        e_{i,j} & = \mathrm{LeakyRelu}(a_{i,j}) \\
+        a_{i,j} & = \bm{W_{\mathrm{att}}^T}[\bm{W x_i}, \bm{W x_j}]
+      \end{aligned}
+    \]
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}{Graph Attention Network \cite{velickovic2018gats}}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/GAT-performance.png}
+  \end{figure}
+
+
+
+\end{frame}
+
 
 %===========================
 % REFERÊNCIAS
