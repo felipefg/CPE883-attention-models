@@ -147,56 +147,12 @@
 		\begin{itemize}
 			\item Escore de alinhamento avalia o quanto a palavra $x_j$ é relevante para prever $y_i$.
 			\item Calculado por uma rede neural feedforward.
+      \item Resolve o gargalo de contexto e permit frases mais longas.
 		\end{itemize}
 
 	\end{columns}
 
 \end{frame}
-
-% 3) Solução 1: Atenção sobre o encoder (Bahdanau/Luong)
-\begin{frame}{Atenção aditiva \cite{bahdanau2014neural}}
-\[
-e_{ij} = a(s_{i-1}, h_j), \quad
-\alpha_{ij} = \frac{\exp(e_{ij})}{\sum_{k=1}^{T_x} \exp(e_{ik})}, \quad
-c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
-\]
-
-\begin{itemize}
-  \item $h_j$: estado oculto do encoder na posição $j$ (palavra $x_j$).
-  \item $s_{i-1}$: estado do decoder no passo anterior ($y_{i-1}$).
-  \item $e_{ij}$: escore de alinhamento entre $h_j$ e $s_{i-1}$ (via rede feedforward).
-  \item $\alpha_{ij}$: pesos normalizados (softmax) $\to$ distribuem a atenção sobre os $h_j$.
-  \item $c_i$: vetor de contexto dinâmico usado para prever $y_i$.
-\end{itemize}
-
-\textbf{Intuição:} O decoder calcula, em cada passo, um mapa de atenção sobre os estados do encoder, decidindo onde focar.
-\end{frame}
-
-\begin{frame}{Integração com encoder bidirecional e decoder}
-\begin{itemize}
-  \item O \textbf{encoder} é uma RNN bidirecional:
-  \[
-  h_j = [\overrightarrow{h_j}; \overleftarrow{h_j}]
-  \]
-  Cada $h_j$ contém contexto passado e futuro da palavra $x_j$.
-  
-  \item O vetor de contexto $c_i$ é construído a partir desses estados bidirecionais.
-  
-  \item O \textbf{decoder} (RNN unidirecional) atualiza seu estado com:
-  \[
-  s_i = f(s_{i-1}, y_{i-1}, c_i)
-  \]
-  - Usa o estado anterior $s_{i-1}$
-  - O símbolo anterior $y_{i-1}$
-  - O contexto dinâmico $c_i$
-  
-  \item Assim, a cada passo, o decoder combina memória interna + contexto dinâmico para prever $y_i$.
-\end{itemize}
-
-\textbf{Resultado:} 
-Resolve o gargalo do vetor fixo único ($h_n$) e permite traduções mais fiéis em frases longas.
-\end{frame}
-
 
 \begin{frame}{Atenção multiplicativa \cite{luong2015effective}}
 \textbf{Três variantes de scoring:}
@@ -822,13 +778,16 @@ dados, parâmetros e recursos disponíveis.
 \begin{frame}{Graph Attention Network \cite{velickovic2018gats}}
   \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{assets/GAT-performance.png}
+    \includegraphics[width=0.6\textwidth]{assets/GAT-performance.png}
   \end{figure}
-
-
+  \textbf{Evoluções de GATs}
+  \small
+  \begin{itemize}
+    \item \textbf{GATv2} \cite{brody2022gatv2}: atenção dinâmica (mais expressiva).
+    \item \textbf{TGAT} \cite{Xu2020InductiveRL}: Aprendizado de representação para grafos temporais
+  \end{itemize}
 
 \end{frame}
-
 
 %===========================
 % REFERÊNCIAS
