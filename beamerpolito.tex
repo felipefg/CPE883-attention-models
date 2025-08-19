@@ -118,7 +118,7 @@
 		\end{aligned}
 	\]
 	\begin{itemize}
-		\item \textbf{Gargalo}: toda a informação comprimida em $c=h_n$.
+		\item \textbf{Gargalo}: toda a informação bla comprimida em $c=h_n$.
 	\end{itemize}
 \end{frame}
 
@@ -393,14 +393,90 @@
 	\end{itemize}
 \end{frame}
 
+%Início da Seção de Vision Transformer
 \section{Vision Transformer}
-\begin{frame}{Vision Transformer (ViT)}
-	\begin{itemize}[<+->]
-		\item Imagem $\rightarrow$ \textit{patches} + \texttt{[CLS]} token
-		\item Posicionais 2D; augmentations (RandAug, Mixup/CutMix)
-		\item Transfer: \textit{linear probe} vs. \textit{fine-tune}
+\begin{frame}{Vision Transformer (ViT) — Introdução}
+	\begin{itemize}
+		\item CNNs dominaram visão computacional por anos (ResNet, EfficientNet, etc.).
+		%\item Transformers foram criados para NLP (\textit{Attention is All You Need}, Vaswani et al., 2017).
+		\item \textbf{ViT (Dosovitskiy et al., 2020):} adapta a atenção para imagens.
+		\item Ideia central: dividir a imagem em \textbf{patches} $\rightarrow$ tokens $\rightarrow$ atenção global.
 	\end{itemize}
+\vspace{0.3cm}
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{assets/vit_pipeline.png} % exemplo: imagem → patches → embeddings → transformer
+	\end{center}
 \end{frame}
+
+\begin{frame}{Arquitetura do Vision Transformer}
+	\begin{itemize}
+		\item \textbf{Patch Embedding:} cada patch (ex: $16\times16$ pixels) é transformado em vetor.
+		\item \textbf{Positional Encoding:} adiciona informação espacial aos tokens.
+		\item \textbf{Transformer Encoder:} múltiplas camadas de \textit{multi-head self-attention} + feedforward.
+		\item \textbf{[CLS] token:} representa a imagem inteira para tarefas de classificação.
+	\end{itemize}
+\vspace{0.1cm}
+	\begin{center}
+	    \includegraphics[width=0.5\textwidth]{assets/vit_architecture.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Resultados do Vision Transformer}
+\begin{itemize}
+    \item ViT pré-treinado em \textbf{JFT-300M} e \textbf{ImageNet-21k} supera CNNs de última geração.
+    \item Comparação em benchmarks populares (ImageNet, CIFAR, Oxford Pets, Flowers, VTAB).
+    \item Uso de \textbf{atenção global} traz ganhos em acurácia com menor custo de pré-treinamento que ResNets muito grandes.
+\end{itemize}
+
+\vspace{0.3cm}
+\begin{center}
+    \includegraphics[width=0.8\textwidth]{assets/vit_results.png}
+\end{center}
+
+\tiny Fonte: Dosovitskiy et al. (2020) \textit{An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale}.
+\end{frame}
+
+\begin{frame}{Pontos chave}
+	\begin{itemize}
+		\item \textbf{Resultados:} ViT supera CNNs em grandes datasets (ex: ImageNet-21k, JFT).
+		\item \textbf{Limitações:} precisa de muito dado e poder computacional para treinar do zero.
+		\item \textbf{Avanços:} variantes mais leves como DeiT, Swin Transformer e modelos híbridos CNN+ViT.
+	\end{itemize}
+\vspace{0.3cm}
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{assets/vit_hybrids.png} 
+	\end{center}
+\end{frame}
+
+\begin{frame}{Avanços do Vision Transformer}
+\begin{itemize}
+    \item \textbf{DeiT (Data-efficient Image Transformers)}  
+    Touvron et al., ICML 2021  
+    \begin{itemize}
+        \item Treino de ViTs menores com menos dados.
+        \item Uso de distilação de conhecimento.
+    \end{itemize}
+
+    \vspace{0.2cm}
+
+    \item \textbf{Swin Transformer (Shifted Windows Transformer)}  
+    Liu et al., ICCV 2021  
+    \begin{itemize}
+        \item Atenção hierárquica em janelas deslizantes.
+        \item Mais eficiente para imagens grandes, detecção e segmentação.
+    \end{itemize}
+
+    \vspace{0.2cm}
+
+    \item \textbf{Modelos Híbridos CNN+ViT}  
+    d’Ascoli et al., ICML 2021 (\textit{ConViT})  
+    \begin{itemize}
+        \item Combinação de convoluções locais + atenção global.
+        \item Inductive bias de CNN ajuda em datasets menores.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+%Fim da seção de Vision transformer
 
 \section{Graph Attention}
 \begin{frame}{Graph Attention Networks (GAT)}
